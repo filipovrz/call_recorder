@@ -5,6 +5,7 @@
 
 | | |
 |---|---|
+| **Локална папка** | `andro_call_recorder` |
 | **Сайт за теглене** | https://call-recorder.evtinko-bg.com |
 | **GitHub** | https://github.com/filipovrz/call_recorder |
 | **Статус** | Checkpoint 4 — сейф; лендинг live; APK още не е качен |

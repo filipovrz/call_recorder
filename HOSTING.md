@@ -4,7 +4,7 @@
 https://sofia.coolice.cloud:2222/evo/filemanager/files?path=/domains/call-recorder.evtinko-bg.com/public_html
 
 Локална папка за качване:  
-`D:\Filpov Ne Pipai\Projects\andro_kall_recorder\deploy\public_html\`
+`D:\Filpov Ne Pipai\Projects\andro_call_recorder\deploy\public_html\`
 
 ## Важно
 
@@ -19,7 +19,7 @@ https://sofia.coolice.cloud:2222/evo/filemanager/files?path=/domains/call-record
 
 Отвори локално в Explorer:
 
-`D:\Filpov Ne Pipai\Projects\andro_kall_recorder\deploy\public_html`
+`D:\Filpov Ne Pipai\Projects\andro_call_recorder\deploy\public_html`
 
 | От компютъра | В File Manager (`.../public_html`) |
 |---|---|

@@ -24,7 +24,7 @@
 2. **Android command-line tools** (безплатно от Google) — скриптът `scripts\setup-android-sdk.ps1` ги сваля.
 3. После билд:
    ```powershell
-   cd "D:\Filpov Ne Pipai\Projects\andro_kall_recorder"
+   cd "D:\Filpov Ne Pipai\Projects\andro_call_recorder"
    .\scripts\build-debug-apk.ps1
    ```
 4. Готовият файл е около:

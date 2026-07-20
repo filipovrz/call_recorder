@@ -1,7 +1,7 @@
 ================================================================================
 ИСТОРИЯ НА РАЗГОВОРИТЕ (чат с асистента в Cursor)
 ================================================================================
-Проект: andro_kall_recorder / Evtinko Call Recorder
+Проект: andro_call_recorder / Evtinko Call Recorder
 Издател: Auctions Evtinko Ltd.
 Домейн: https://call-recorder.evtinko-bg.com
 GitHub: https://github.com/filipovrz/call_recorder
@@ -118,6 +118,15 @@ GitHub https://github.com/filipovrz/call_recorder, README и други.
 - git commit + push към даденото GitHub repo
 - бележка за продължение: довършване на debug APK build и качване в
   public_html/downloads/evtinko-call-recorder.apk
+
+================================================================================
+ЧАСТ 6 — Rename + почивка (2026-07-20)
+================================================================================
+
+Ти: Промени andro_kall_recorder на andro_call_recorder и почивка.
+
+Асистент: Преименува локалната папка и обнови пътищата в HOSTING/BUILD/README/
+История/CHECKPOINTS; commit + push към GitHub; workspace root към новия път.
 
 ================================================================================
 СЪСТОЯНИЕ ПРИ СЕЙФ (checkpoint 4)
