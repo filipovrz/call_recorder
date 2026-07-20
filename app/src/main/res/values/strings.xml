@@ -9,5 +9,5 @@
     <string name="overlay_start_record">Запис</string>
     <string name="overlay_stop_record">Стоп</string>
     <string name="legal_notice">Записвай разговори само когато това е позволено от закона в твоята държава. Приложението не предупреждава отсрещната страна със звуков сигнал.</string>
-    <string name="about_footer">© Auctions Evtinko Ltd. · Дистрибуция извън Google Play (APK от хостинг)</string>
+    <string name="about_footer">© Auctions Evtinko Ltd. · Безплатно · APK от официалния хост (не от Google Play)</string>
 </resources>

@@ -11,7 +11,7 @@
   fetch(apkUrl, { method: "HEAD" })
     .then(function (res) {
       if (!res.ok) throw new Error("missing");
-      if (status) status.textContent = "Версия 0.1.0 · Android 8.0+ · Готово за изтегляне";
+      if (status) status.textContent = "Безплатно · Версия 0.1.0 · Android 8.0+ · Готово за изтегляне";
     })
     .catch(function () {
       btn.classList.add("is-disabled");
