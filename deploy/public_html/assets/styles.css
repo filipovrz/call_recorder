@@ -1,0 +1,206 @@
+:root {
+  --ink: #12241c;
+  --foam: #e8f5f0;
+  --mint: #7ad4b0;
+  --green: #1b7a5a;
+  --deep: #0b3d2e;
+  --deep-2: #06261c;
+  --sand: #d7ebe1;
+  --warn: #c45c26;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Manrope", system-ui, sans-serif;
+  color: var(--foam);
+  background: var(--deep-2);
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 10%, rgba(122, 212, 176, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 15% 80%, rgba(27, 122, 90, 0.35), transparent 50%),
+    linear-gradient(165deg, #0b3d2e 0%, #06261c 45%, #0a2f24 100%);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+.wave {
+  position: fixed;
+  inset: auto 0 -20% 0;
+  height: 55vh;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(
+      100deg,
+      transparent 0 18px,
+      rgba(232, 245, 240, 0.035) 18px 19px
+    );
+  mask-image: linear-gradient(to top, black 20%, transparent 85%);
+  transform-origin: center bottom;
+  animation: pulse-wave 7s ease-in-out infinite;
+}
+
+@keyframes drift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.04) translate3d(-1.5%, 1%, 0); }
+}
+
+@keyframes pulse-wave {
+  0%, 100% { opacity: 0.55; transform: scaleY(1); }
+  50% { opacity: 0.9; transform: scaleY(1.06); }
+}
+
+.top {
+  padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 0;
+}
+
+.brand-mark {
+  margin: 0;
+  font-family: "Unbounded", "Manrope", sans-serif;
+  font-size: clamp(1.15rem, 2.6vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--foam);
+}
+
+.hero {
+  min-height: calc(100vh - 5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem clamp(1.25rem, 4vw, 3rem) 4rem;
+  max-width: 42rem;
+}
+
+.product {
+  margin: 0 0 0.75rem;
+  font-family: "Unbounded", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mint);
+}
+
+.hero h1 {
+  margin: 0 0 1rem;
+  font-family: "Unbounded", sans-serif;
+  font-size: clamp(2rem, 6vw, 3.35rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0 0 2rem;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  color: var(--sand);
+  max-width: 34rem;
+}
+
+.cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.6rem;
+  border-radius: 0.35rem;
+  background: var(--mint);
+  color: var(--deep-2);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 0 0 0 rgba(122, 212, 176, 0.35);
+  animation: cta-glow 3.5s ease-in-out infinite;
+}
+
+.cta:hover {
+  background: #9be0c4;
+  transform: translateY(-2px);
+}
+
+.cta.is-disabled {
+  pointer-events: none;
+  opacity: 0.55;
+  animation: none;
+  background: #4a6b5d;
+  color: var(--foam);
+}
+
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(122, 212, 176, 0.2); }
+  50% { box-shadow: 0 0 0 12px rgba(122, 212, 176, 0); }
+}
+
+.cta-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(232, 245, 240, 0.7);
+}
+
+.install {
+  padding: 3rem clamp(1.25rem, 4vw, 3rem) 2rem;
+  max-width: 40rem;
+  border-top: 1px solid rgba(232, 245, 240, 0.12);
+}
+
+.install h2 {
+  margin: 0 0 1rem;
+  font-family: "Unbounded", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.install ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--sand);
+}
+
+.install li {
+  margin-bottom: 0.65rem;
+}
+
+.foot {
+  padding: 2rem clamp(1.25rem, 4vw, 3rem) 3rem;
+  border-top: 1px solid rgba(232, 245, 240, 0.12);
+  max-width: 40rem;
+}
+
+.foot p {
+  margin: 0 0 0.75rem;
+}
+
+.legal {
+  font-size: 0.85rem;
+  color: rgba(232, 245, 240, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmosphere,
+  .wave,
+  .cta {
+    animation: none;
+  }
+}

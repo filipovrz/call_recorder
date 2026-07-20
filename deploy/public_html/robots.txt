@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://call-recorder.evtinko-bg.com/sitemap.xml

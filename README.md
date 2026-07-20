@@ -3,11 +3,19 @@
 Приложение за запис на телефонни разговори за Android.  
 **Запазена марка / издател:** Auctions Evtinko Ltd.
 
+## Дистрибуция (уеб)
+
+Лендинг за изтегляне: папка `deploy/public_html/`  
+Домейн: [https://call-recorder.evtinko-bg.com](https://call-recorder.evtinko-bg.com)
+
+Качване към хостинг:
+`/domains/call-recorder.evtinko-bg.com/public_html`
+
+APK файл: `public_html/downloads/evtinko-call-recorder.apk` (след build)
+
 ## Дистрибуция
 
-Приложението **не** се публикува в Google Play. Крайните потребители го теглят и инсталират като APK от хостинг акаунта на издателя (sideload). Нужно е „Инсталиране от неизвестни източници“ / разрешение за браузъра/файловия мениджър.
-
-Build артефакт: `app/build/outputs/apk/release/app-release.apk` (след подписване) или debug за вътрешни тестове.
+Приложението **не** се публикува в Google Play. Крайните потребители го теглят като APK от официалния сайт по-горе.
 
 ## Статус
 
