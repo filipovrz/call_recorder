@@ -11,4 +11,7 @@ app/build
 *.apk
 *.aab
 *.keystore
+*.jks
 .chat-checkpoints/
+deploy/public_html/downloads/*.apk
+!deploy/public_html/downloads/README.txt
