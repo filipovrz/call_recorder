@@ -79,7 +79,7 @@ fun CallRecorderAppScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Andro Call Recorder", fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.SemiBold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -177,6 +177,14 @@ fun CallRecorderAppScreen(
                         onDelete = { viewModel.deleteRecording(item) }
                     )
                 }
+            }
+
+            item {
+                Text(
+                    text = stringResource(R.string.about_footer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
             }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
