@@ -159,6 +159,17 @@ body {
   color: rgba(232, 245, 240, 0.7);
 }
 
+.download-count {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  color: var(--mint);
+}
+
+.download-count strong {
+  font-weight: 700;
+  color: var(--foam);
+}
+
 .install {
   padding: 3rem clamp(1.25rem, 4vw, 3rem) 2rem;
   max-width: 40rem;

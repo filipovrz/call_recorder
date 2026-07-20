@@ -4,85 +4,76 @@
 https://sofia.coolice.cloud:2222/evo/filemanager/files?path=/domains/call-recorder.evtinko-bg.com/public_html
 
 Локална папка за качване:  
-`D:\Filpov Ne Pipai\Projects\andro_call_recorder\deploy\public_html\`
+`andro_call_recorder/deploy/public_html/`
 
 ## Важно
 
-В `public_html` се качва **само уеб страницата** (+ по-късно APK).  
-**Не** качвай целия Android проект (`app`, `gradle`, `.git` и т.н.) — кодът не трябва да е публичен.
+В `public_html` се качва **само уеб страницата** (+ APK).  
+**Не** качвай целия Android проект (`app`, `gradle`, `.git` и т.н.).
 
-Приложението (APK) още **не е билднато**. Страницата ще работи веднага; бутонът „Изтегли“ ще е неактивен, докато качим APK.
+Дистрибуцията е **безплатна** от този хост — без Google Play.
 
 ---
 
-## Какво да качиш (откъде → къде)
-
-Отвори локално в Explorer:
-
-`D:\Filpov Ne Pipai\Projects\andro_call_recorder\deploy\public_html`
+## Какво да качиш
 
 | От компютъра | В File Manager (`.../public_html`) |
 |---|---|
-| `index.html` | качи като `index.html` (замести стария, ако има) |
-| `robots.txt` | качи като `robots.txt` |
-| папка `assets` (цялата) | създай/качи папка `assets` с `styles.css` и `main.js` |
-| папка `downloads` | създай/качи папка `downloads` (засега може само с `README.txt`) |
+| `index.html` | `index.html` |
+| `robots.txt` | `robots.txt` |
+| `download.php` | `download.php` (брои тегленията + сервира APK) |
+| `count.php` | `count.php` (показва брояча на страницата) |
+| папка `assets/` | `assets/` (`styles.css`, `main.js`) |
+| папка `data/` | `data/` (`.htaccess` + `downloads.json`) |
+| папка `downloads/` | `downloads/` (`.htaccess` + `evtinko-call-recorder.apk`) |
 
-Крайна структура на хоста трябва да е:
+Крайна структура:
 
 ```
 public_html/
   index.html
   robots.txt
+  download.php
+  count.php
   assets/
     styles.css
     main.js
+  data/
+    .htaccess
+    downloads.json      ← брояч (започва от 0)
   downloads/
-    README.txt          ← временно
-    evtinko-call-recorder.apk   ← по-късно, след build
+    .htaccess           ← блокира директен линк към APK
+    evtinko-call-recorder.apk
 ```
 
----
-
-## Стъпки в File Manager (без SSH)
-
-1. Влез в линка на File Manager по-горе.
-2. Ако в `public_html` има default `index.html` / `index.php` от хостинга — преименувай го на `index.old.html` (за всеки случай).
-3. Качи `index.html` и `robots.txt` в корена на `public_html`.
-4. Създай папка `assets` → влез в нея → качи:
-   - `styles.css`
-   - `main.js`  
-   (от локалната `deploy\public_html\assets\`)
-5. Създай папка `downloads` (празна или с README — няма значение за страницата).
-6. Отвори в браузър: https://call-recorder.evtinko-bg.com/
-
-Очакван резултат: зелена лендинг страница „Evtinko Call Recorder“ / Auctions Evtinko Ltd.  
-Бутонът „Изтегли APK“ е сив, докато липсва APK — нормално.
+След качване: правата на `data/` и `data/downloads.json` трябва да позволяват запис от PHP
+(обикновено 755 за папка / 644 за файл; ако броенето не работи — пробвай 775 / 666).
 
 ---
 
-## После: APK
+## Брояч на изтегляния
 
-Когато имаме подписан APK:
+- Бутонът води към `download.php` → +1 към брояча → тегли APK.
+- На страницата се вижда: „Изтеглено N пъти“ (от `count.php`).
+- Директният URL към `.apk` е блокиран, за да не се заобикаля броенето.
 
-1. Преименувай го локално на `evtinko-call-recorder.apk`
-2. Качи го в `public_html/downloads/`
-3. Обнови страницата — бутонът става активен
+Проверка: https://call-recorder.evtinko-bg.com/count.php  
+трябва да върне JSON като `{"count":0,"available":true,"version":"0.1.0"}`.
 
 ---
 
-## SSH (по желание, по-късно)
+## APK
+
+Локално копие след Actions билд:
+
+`deploy/public_html/downloads/evtinko-call-recorder.apk`
+
+Качи го в `public_html/downloads/` със същото име.
+
+---
+
+## SSH (по желание)
 
 - Хост: `sofia.coolice.cloud`
 - Порт: **22** (не 2222)
 - Път: `domains/call-recorder.evtinko-bg.com/public_html`
-- Нужен е DirectAdmin **Username** (не имейл)
-
-Докато качваш през File Manager, SSH не е задължителен.
-
-## Продължение на друг компютър
-
-1. `git clone https://github.com/filipovrz/call_recorder.git`
-2. Виж [BUILD.md](BUILD.md) за APK
-3. Качи APK в `downloads/` както по-горе
-4. Историята на работата е в `История на задачите.txt`
