@@ -1,6 +1,7 @@
 package com.androkall.recorder.data
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,7 +32,7 @@ class RecordingsRepository(context: Context) {
                     displayName = file.name,
                     phoneNumber = phone,
                     startedAtMillis = file.lastModified(),
-                    durationHintMillis = null,
+                    durationHintMillis = readDurationMillis(file),
                     sizeBytes = file.length()
                 )
             }
@@ -41,4 +42,16 @@ class RecordingsRepository(context: Context) {
     fun delete(file: File): Boolean = file.exists() && file.delete()
 
     fun recordingsDir(): File = rootDir
+
+    private fun readDurationMillis(file: File): Long? {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(file.absolutePath)
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
+        } catch (_: Exception) {
+            null
+        } finally {
+            runCatching { retriever.release() }
+        }
+    }
 }

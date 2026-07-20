@@ -60,16 +60,14 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
         when (phase) {
             CallPhase.RINGING -> {
-                if (settings.showOverlayOnRinging) {
+                // Show overlay while ringing so the user can start before answering.
+                // Also show when armed, even if the overlay toggle is off.
+                if (settings.showOverlayOnRinging || settings.armedForNextCall) {
                     CallOverlayService.show(context, number)
-                }
-                if (settings.armedForNextCall) {
-                    // Arming before answer: start as soon as user wants via overlay,
-                    // or wait for OFFHOOK if auto-record is also on.
                 }
             }
             CallPhase.OFFHOOK -> {
-                if (settings.showOverlayOnRinging) {
+                if (settings.showOverlayOnRinging || settings.armedForNextCall) {
                     CallOverlayService.show(context, number)
                 }
                 val shouldAutoStart = settings.autoRecordOnAnswer || settings.armedForNextCall
@@ -83,13 +81,16 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 lastOutgoingNumber = null
             }
         }
-        // Keep isIncoming available for future metadata/UI; currently unused.
-        @Suppress("UNUSED_VARIABLE")
-        val ignored = isIncoming
+
+        lastCallWasIncoming = isIncoming
     }
 
     companion object {
         @Volatile
         private var lastOutgoingNumber: String? = null
+
+        @Volatile
+        var lastCallWasIncoming: Boolean = true
+            private set
     }
 }

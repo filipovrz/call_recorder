@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,15 +39,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier.Modifier
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androkall.recorder.R
@@ -55,6 +60,8 @@ import com.androkall.recorder.data.RecordingItem
 import com.androkall.recorder.util.PermissionHelper
 import java.text.DateFormat
 import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +71,7 @@ fun CallRecorderAppScreen(
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val recordings by viewModel.recordings.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -74,6 +82,16 @@ fun CallRecorderAppScreen(
         if (missing.isNotEmpty()) {
             permissionLauncher.launch(missing.toTypedArray())
         }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshRecordings()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Scaffold(
@@ -127,7 +145,10 @@ fun CallRecorderAppScreen(
                             viewModel.startManualRecording()
                         }
                     },
-                    onStopNow = viewModel::stopManualRecording
+                    onStopNow = {
+                        viewModel.stopManualRecording()
+                        viewModel.refreshRecordings()
+                    }
                 )
             }
 
@@ -173,6 +194,23 @@ fun CallRecorderAppScreen(
                                 .onFailure {
                                     Toast.makeText(context, "Няма плеър за аудио", Toast.LENGTH_SHORT).show()
                                 }
+                        },
+                        onShare = {
+                            val uri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                item.file
+                            )
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "audio/*"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            runCatching {
+                                context.startActivity(Intent.createChooser(intent, "Сподели запис"))
+                            }.onFailure {
+                                Toast.makeText(context, "Не може да се сподели", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         onDelete = { viewModel.deleteRecording(item) }
                     )
@@ -227,7 +265,7 @@ private fun ControlsCard(
             )
             SettingRow(
                 title = "Бутон върху екрана при звънене",
-                subtitle = "Лесно включване преди/по време на обаждане",
+                subtitle = "Лесно включване преди/по време на обаждане (може да се влачи)",
                 checked = showOverlay,
                 onCheckedChange = onShowOverlayChange
             )
@@ -305,8 +343,24 @@ private fun SettingRow(
 private fun RecordingRow(
     item: RecordingItem,
     onPlay: () -> Unit,
+    onShare: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val durationLabel = item.durationHintMillis?.let { formatDuration(it) }
+    val meta = buildString {
+        append(DateFormat.getDateTimeInstance().format(Date(item.startedAtMillis)))
+        if (durationLabel != null) {
+            append(" · ")
+            append(durationLabel)
+        }
+        append(" · ")
+        append("${item.sizeBytes / 1024} KB")
+        item.phoneNumber?.takeIf { it.isNotBlank() }?.let {
+            append(" · ")
+            append(it)
+        }
+    }
+
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -319,18 +373,24 @@ private fun RecordingRow(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Text(
-                    text = DateFormat.getDateTimeInstance().format(Date(item.startedAtMillis)) +
-                        " · ${item.sizeBytes / 1024} KB",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Text(text = meta, style = MaterialTheme.typography.bodySmall)
             }
             IconButton(onClick = onPlay) {
                 Icon(Icons.Default.PlayArrow, contentDescription = "Пусни")
+            }
+            IconButton(onClick = onShare) {
+                Icon(Icons.Default.Share, contentDescription = "Сподели")
             }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, contentDescription = "Изтрий")
             }
         }
     }
+}
+
+private fun formatDuration(millis: Long): String {
+    val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(millis).coerceAtLeast(0)
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format(Locale.US, "%d:%02d", minutes, seconds)
 }

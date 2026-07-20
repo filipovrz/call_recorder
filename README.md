@@ -8,21 +8,21 @@
 | **Локална папка** | `andro_call_recorder` |
 | **Сайт за теглене** | https://call-recorder.evtinko-bg.com |
 | **GitHub** | https://github.com/filipovrz/call_recorder |
-| **Статус** | Checkpoint 4 — сейф; лендинг live; APK още не е качен |
+| **Статус** | Checkpoint 6 — build оправен; debug APK през Actions |
 
 ## Какво е готово
 
 - Android приложение (Kotlin + Jetpack Compose): arm преди обаждане, overlay при звънене, автозапис, списък записи
+- Overlay бутон с влачене; споделяне на записи; показване на продължителност
 - Запис **без звуков сигнал** към отсрещната страна
 - Лендинг страница на Coolice хостинг (`deploy/public_html`)
 - Безплатен билд **без Android Studio** (JDK 17 + SDK cmdline / GitHub Actions)
 
 ## Какво остава
 
-1. Build на debug APK → качване като `public_html/downloads/evtinko-call-recorder.apk`
-2. Тест на реално устройство
-3. Допълнителни функции (по твоите следващи указания)
-4. По-късно: подписан release APK
+1. Качи `evtinko-call-recorder.apk` в `public_html/downloads/` (ако още не е на хоста)
+2. Тест на реално устройство (двустранен звук зависи от OEM)
+3. По-късно: подписан release APK
 
 ## Документи
 

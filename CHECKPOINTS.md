@@ -1,37 +1,52 @@
-# Checkpoint log
+﻿# Checkpoint log
 
 Пълна история на разговора: [История на задачите.txt](История%20на%20задачите.txt)
 
-## Checkpoint 5 — 2026-07-20 (rename)
+## Checkpoint 6 — 2026-07-21 (довършване)
 
-Преименувана локална папка/проект: `andro_kall_recorder` → `andro_call_recorder`.
+**Направено**
+- Оправени Compose импорти (Modifier) — CI compile беше счупен
+- RINGING + armed: overlay се показва и при подготвен запис
+- Продължителност на записи + споделяне
+- Overlay с влачене; refresh на списъка при resume
+- Премахната неизползвана navigation-compose зависимост
+- Debug APK през GitHub Actions
 
-## Checkpoint 4 — 2026-07-20 (пълен сейф преди почивка)
+**Следва от теб**
+- Качи APK в File Manager downloads/evtinko-call-recorder.apk
+- Тест на телефон
 
-**Запазено**
-- История на чата от началото до тук (`История на задачите.txt`)
-- README / HOSTING / BUILD / този файл
-- GitHub цел: https://github.com/filipovrz/call_recorder
-- Скриптове за безплатен билд без Android Studio
+## Checkpoint 5 вЂ” 2026-07-20 (rename)
+
+РџСЂРµРёРјРµРЅСѓРІР°РЅР° Р»РѕРєР°Р»РЅР° РїР°РїРєР°/РїСЂРѕРµРєС‚: `andro_kall_recorder` в†’ `andro_call_recorder`.
+
+## Checkpoint 4 вЂ” 2026-07-20 (РїСЉР»РµРЅ СЃРµР№С„ РїСЂРµРґРё РїРѕС‡РёРІРєР°)
+
+**Р—Р°РїР°Р·РµРЅРѕ**
+- РСЃС‚РѕСЂРёСЏ РЅР° С‡Р°С‚Р° РѕС‚ РЅР°С‡Р°Р»РѕС‚Рѕ РґРѕ С‚СѓРє (`РСЃС‚РѕСЂРёСЏ РЅР° Р·Р°РґР°С‡РёС‚Рµ.txt`)
+- README / HOSTING / BUILD / С‚РѕР·Рё С„Р°Р№Р»
+- GitHub С†РµР»: https://github.com/filipovrz/call_recorder
+- РЎРєСЂРёРїС‚РѕРІРµ Р·Р° Р±РµР·РїР»Р°С‚РµРЅ Р±РёР»Рґ Р±РµР· Android Studio
 - GitHub Actions: `.github/workflows/build-apk.yml`
 
 **Live**
-- Сайт OK: https://call-recorder.evtinko-bg.com
-- APK още липсва → бутонът за теглене е неактивен (нормално)
+- РЎР°Р№С‚ OK: https://call-recorder.evtinko-bg.com
+- APK РѕС‰Рµ Р»РёРїСЃРІР° в†’ Р±СѓС‚РѕРЅСЉС‚ Р·Р° С‚РµРіР»РµРЅРµ Рµ РЅРµР°РєС‚РёРІРµРЅ (РЅРѕСЂРјР°Р»РЅРѕ)
 
-**Следва**
-- Довършване на debug APK + качване в `downloads/evtinko-call-recorder.apk`
-- Продължение на функционалността след почивка / на друг PC
+**РЎР»РµРґРІР°**
+- Р”РѕРІСЉСЂС€РІР°РЅРµ РЅР° debug APK + РєР°С‡РІР°РЅРµ РІ `downloads/evtinko-call-recorder.apk`
+- РџСЂРѕРґСЉР»Р¶РµРЅРёРµ РЅР° С„СѓРЅРєС†РёРѕРЅР°Р»РЅРѕСЃС‚С‚Р° СЃР»РµРґ РїРѕС‡РёРІРєР° / РЅР° РґСЂСѓРі PC
 
-## Checkpoint 3 — 2026-07-20
+## Checkpoint 3 вЂ” 2026-07-20
 
-Лендинг в `deploy/public_html/`; качен през File Manager; сайтът се отваря.
+Р›РµРЅРґРёРЅРі РІ `deploy/public_html/`; РєР°С‡РµРЅ РїСЂРµР· File Manager; СЃР°Р№С‚СЉС‚ СЃРµ РѕС‚РІР°СЂСЏ.
 
-## Checkpoint 2 — 2026-07-20
+## Checkpoint 2 вЂ” 2026-07-20
 
-Бранд Auctions Evtinko Ltd.; `applicationId` `com.auctionsevtinko.callrecorder`;
-дистрибуция през собствен хостинг.
+Р‘СЂР°РЅРґ Auctions Evtinko Ltd.; `applicationId` `com.auctionsevtinko.callrecorder`;
+РґРёСЃС‚СЂРёР±СѓС†РёСЏ РїСЂРµР· СЃРѕР±СЃС‚РІРµРЅ С…РѕСЃС‚РёРЅРі.
 
-## Checkpoint 1 — 2026-07-20
+## Checkpoint 1 вЂ” 2026-07-20
 
-Android scaffold + локален git; запис без warning tone; overlay/arm/auto-record.
+Android scaffold + Р»РѕРєР°Р»РµРЅ git; Р·Р°РїРёСЃ Р±РµР· warning tone; overlay/arm/auto-record.
+

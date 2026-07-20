@@ -151,3 +151,19 @@ GitHub https://github.com/filipovrz/call_recorder, README и други.
 
 На друг Windows PC за локален билд пак трябват JDK 17 + Android SDK
 (или само Actions в облака — по-лесно).
+
+================================================================================
+ЧАСТ 7 — Довършване на проекта (2026-07-21)
+================================================================================
+
+Ти: Прегледай проекта, виж какво има още да се прави и го довърши.
+
+Асистент:
+- Откри счупени Compose импорти (Modifier) — GitHub Actions compile FAIL
+- На този PC няма JDK/SDK → билд през Actions
+- Оправи импортите; довърши RINGING/armed overlay; duration + share;
+  draggable overlay; refresh при resume; махна unused navigation
+- Checkpoint 6 / README обновени
+- Commit + push + Actions build → APK в deploy/public_html/downloads/
+- Качването на хоста остава през File Manager (както преди)
+
