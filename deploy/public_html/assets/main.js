@@ -43,7 +43,7 @@
       if (data && data.available) {
         if (status) {
           status.textContent =
-            "Безплатно · Версия 0.1.0 · Android 8.0+ · Готово за изтегляне";
+            "Безплатно · Версия 0.1.1 · Android 8.0+ · Готово за изтегляне";
         }
       } else {
         disableButton();
@@ -65,7 +65,7 @@
           if (!res.ok) throw new Error("missing");
           if (status) {
             status.textContent =
-              "Безплатно · Версия 0.1.0 · Android 8.0+ · Готово за изтегляне";
+              "Безплатно · Версия 0.1.1 · Android 8.0+ · Готово за изтегляне";
           }
         })
         .catch(function () {

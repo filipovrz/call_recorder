@@ -27,7 +27,7 @@ echo json_encode(
     [
         'count' => $count,
         'available' => is_file($apk),
-        'version' => '0.1.0',
+        'version' => '0.1.1',
     ],
     JSON_UNESCAPED_UNICODE
 );
