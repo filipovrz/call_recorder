@@ -14,7 +14,9 @@ import androidx.core.app.ServiceCompat
 import com.androkall.recorder.CallRecorderApp
 import com.androkall.recorder.R
 import com.androkall.recorder.data.AudioSourceOption
+import com.androkall.recorder.data.RecordingExporter
 import com.androkall.recorder.recording.CallAudioRecorder
+import com.androkall.recorder.recording.CallAudioRouteController
 import com.androkall.recorder.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +28,8 @@ import kotlinx.coroutines.launch
 class CallRecordingService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var recorder: CallAudioRecorder
+    private var audioRoute: CallAudioRouteController? = null
+    private var autoSaveToDownloads: Boolean = false
 
     override fun onCreate() {
         super.onCreate()
@@ -57,22 +61,41 @@ class CallRecordingService : Service() {
         val settings = app.settingsRepository.settings.first()
         val source = runCatching {
             AudioSourceOption.valueOf(settings.preferredAudioSource)
-        }.getOrDefault(AudioSourceOption.VOICE_COMMUNICATION)
+        }.getOrDefault(AudioSourceOption.BOTH_SIDES)
+        autoSaveToDownloads = settings.autoSaveToDownloads
+
+        val bothSides = settings.captureBothSides ||
+            source == AudioSourceOption.BOTH_SIDES ||
+            source == AudioSourceOption.VOICE_CALL
 
         try {
-            recorder.start(number, source)
+            if (bothSides) {
+                audioRoute = CallAudioRouteController(this).also { it.enableSpeakerForBothSides() }
+            }
+            recorder.start(number, source, preferBothSides = bothSides)
             if (settings.armedForNextCall) {
                 app.settingsRepository.setArmedForNextCall(false)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start recording", e)
+            audioRoute?.restore()
+            audioRoute = null
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
     }
 
     private fun stopRecordingAndSelf() {
-        recorder.stop()
+        val file = recorder.stop()
+        audioRoute?.restore()
+        audioRoute = null
+        if (file != null && autoSaveToDownloads) {
+            runCatching {
+                RecordingExporter.copyToDownloads(this, file)
+            }.onFailure {
+                Log.w(TAG, "Auto-save to Downloads failed: ${it.message}")
+            }
+        }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -131,6 +154,8 @@ class CallRecordingService : Service() {
         if (recorder.isRecording) {
             recorder.stop()
         }
+        audioRoute?.restore()
+        audioRoute = null
         scope.cancel()
         super.onDestroy()
     }

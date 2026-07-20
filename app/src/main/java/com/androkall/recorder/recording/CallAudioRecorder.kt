@@ -10,7 +10,9 @@ import java.io.File
 
 /**
  * Records call audio locally without injecting any beep/tone into the call path.
- * Note: capturing both call parties depends on OEM/Android version restrictions.
+ *
+ * For both parties: tries VOICE_CALL first; when [preferBothSides] is true the service
+ * also routes audio to the loudspeaker so MIC can pick up the remote side.
  */
 class CallAudioRecorder(private val context: Context) {
     private val recordingsRepository = RecordingsRepository(context)
@@ -25,14 +27,15 @@ class CallAudioRecorder(private val context: Context) {
 
     fun start(
         phoneNumber: String?,
-        preferredSource: AudioSourceOption = AudioSourceOption.VOICE_COMMUNICATION
+        preferredSource: AudioSourceOption = AudioSourceOption.BOTH_SIDES,
+        preferBothSides: Boolean = true
     ): File {
         if (isRecording) {
             stop()
         }
 
         val file = recordingsRepository.createOutputFile(phoneNumber)
-        val sources = buildSourceOrder(preferredSource)
+        val sources = buildSourceOrder(preferredSource, preferBothSides)
         var lastError: Exception? = null
 
         for (source in sources) {
@@ -92,18 +95,36 @@ class CallAudioRecorder(private val context: Context) {
         }
     }
 
-    private fun buildSourceOrder(preferred: AudioSourceOption): List<Int> {
+    private fun buildSourceOrder(preferred: AudioSourceOption, preferBothSides: Boolean): List<Int> {
         val preferredInt = preferred.toMediaSource()
-        val fallbacks = listOf(
+        val bothSidesFirst = listOf(
+            MediaRecorder.AudioSource.VOICE_CALL,
             MediaRecorder.AudioSource.VOICE_COMMUNICATION,
             MediaRecorder.AudioSource.MIC,
             MediaRecorder.AudioSource.VOICE_RECOGNITION,
-            MediaRecorder.AudioSource.CAMCORDER
+            MediaRecorder.AudioSource.CAMCORDER,
+            MediaRecorder.AudioSource.DEFAULT
         )
-        return (listOf(preferredInt) + fallbacks).distinct()
+        val standard = listOf(
+            preferredInt,
+            MediaRecorder.AudioSource.VOICE_CALL,
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+            MediaRecorder.AudioSource.MIC,
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            MediaRecorder.AudioSource.CAMCORDER,
+            MediaRecorder.AudioSource.DEFAULT
+        )
+        val ordered = if (preferBothSides || preferred == AudioSourceOption.BOTH_SIDES || preferred == AudioSourceOption.VOICE_CALL) {
+            listOf(preferredInt) + bothSidesFirst
+        } else {
+            standard
+        }
+        return ordered.distinct()
     }
 
     private fun AudioSourceOption.toMediaSource(): Int = when (this) {
+        AudioSourceOption.BOTH_SIDES -> MediaRecorder.AudioSource.VOICE_CALL
+        AudioSourceOption.VOICE_CALL -> MediaRecorder.AudioSource.VOICE_CALL
         AudioSourceOption.VOICE_COMMUNICATION -> MediaRecorder.AudioSource.VOICE_COMMUNICATION
         AudioSourceOption.MIC -> MediaRecorder.AudioSource.MIC
         AudioSourceOption.VOICE_RECOGNITION -> MediaRecorder.AudioSource.VOICE_RECOGNITION

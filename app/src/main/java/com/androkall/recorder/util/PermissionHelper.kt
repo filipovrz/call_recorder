@@ -21,6 +21,9 @@ object PermissionHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             list += Manifest.permission.POST_NOTIFICATIONS
         }
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            list += Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }
         return list.toTypedArray()
     }
 

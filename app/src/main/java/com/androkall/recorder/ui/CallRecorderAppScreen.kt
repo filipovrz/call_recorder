@@ -4,6 +4,8 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,9 +21,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
@@ -42,16 +46,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androkall.recorder.R
@@ -71,16 +78,35 @@ fun CallRecorderAppScreen(
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val recordings by viewModel.recordings.collectAsStateWithLifecycle()
+    val statusMessage by viewModel.statusMessage.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+    var pendingSaveItem by remember { mutableStateOf<RecordingItem?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* refresh UI via recomposition when user returns */ }
+    ) { }
+
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("audio/mp4")
+    ) { uri ->
+        val item = pendingSaveItem
+        pendingSaveItem = null
+        if (uri != null && item != null) {
+            viewModel.saveToUri(item, uri)
+        }
+    }
 
     LaunchedEffect(Unit) {
         val missing = PermissionHelper.missingPermissions(context)
         if (missing.isNotEmpty()) {
             permissionLauncher.launch(missing.toTypedArray())
+        }
+    }
+
+    LaunchedEffect(statusMessage) {
+        statusMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearStatusMessage()
         }
     }
 
@@ -132,10 +158,14 @@ fun CallRecorderAppScreen(
                     armed = settings.armedForNextCall,
                     autoRecord = settings.autoRecordOnAnswer,
                     showOverlay = settings.showOverlayOnRinging,
+                    bothSides = settings.captureBothSides,
+                    autoSaveDownloads = settings.autoSaveToDownloads,
                     hasOverlayPermission = PermissionHelper.canDrawOverlays(context),
                     onArmChange = viewModel::setArmed,
                     onAutoRecordChange = viewModel::setAutoRecord,
                     onShowOverlayChange = viewModel::setShowOverlay,
+                    onBothSidesChange = viewModel::setCaptureBothSides,
+                    onAutoSaveChange = viewModel::setAutoSaveToDownloads,
                     onRequestOverlay = { PermissionHelper.openOverlaySettings(context) },
                     onStartNow = {
                         if (!PermissionHelper.hasAllRuntimePermissions(context)) {
@@ -156,7 +186,7 @@ fun CallRecorderAppScreen(
                 AudioSourceCard(
                     selected = runCatching {
                         AudioSourceOption.valueOf(settings.preferredAudioSource)
-                    }.getOrDefault(AudioSourceOption.VOICE_COMMUNICATION),
+                    }.getOrDefault(AudioSourceOption.BOTH_SIDES),
                     onSelect = viewModel::setAudioSource
                 )
             }
@@ -166,6 +196,11 @@ fun CallRecorderAppScreen(
                     text = "Записи",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "Вътрешни файлове + бутони за копие в Изтегляния или „Запази като…“",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
             }
 
@@ -194,6 +229,11 @@ fun CallRecorderAppScreen(
                                 .onFailure {
                                     Toast.makeText(context, "Няма плеър за аудио", Toast.LENGTH_SHORT).show()
                                 }
+                        },
+                        onSaveDownloads = { viewModel.saveToDownloads(item) },
+                        onSaveAs = {
+                            pendingSaveItem = item
+                            createDocumentLauncher.launch(item.displayName)
                         },
                         onShare = {
                             val uri = FileProvider.getUriForFile(
@@ -235,10 +275,14 @@ private fun ControlsCard(
     armed: Boolean,
     autoRecord: Boolean,
     showOverlay: Boolean,
+    bothSides: Boolean,
+    autoSaveDownloads: Boolean,
     hasOverlayPermission: Boolean,
     onArmChange: (Boolean) -> Unit,
     onAutoRecordChange: (Boolean) -> Unit,
     onShowOverlayChange: (Boolean) -> Unit,
+    onBothSidesChange: (Boolean) -> Unit,
+    onAutoSaveChange: (Boolean) -> Unit,
     onRequestOverlay: () -> Unit,
     onStartNow: () -> Unit,
     onStopNow: () -> Unit
@@ -251,6 +295,18 @@ private fun ControlsCard(
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Бързи действия", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
+            SettingRow(
+                title = "И двете страни на разговора",
+                subtitle = "Високоговорител + микрофон (и опит за VOICE_CALL). Разговорът минава през високоговорителя по време на запис.",
+                checked = bothSides,
+                onCheckedChange = onBothSidesChange
+            )
+            SettingRow(
+                title = "Автокопие в Изтегляния",
+                subtitle = "След край на записа копира файла в Изтегляния/EvtinkoCallRecorder",
+                checked = autoSaveDownloads,
+                onCheckedChange = onAutoSaveChange
+            )
             SettingRow(
                 title = "Подготви запис за следващото обаждане",
                 subtitle = "Включи преди позвъняване — стартира при вдигане",
@@ -304,20 +360,32 @@ private fun AudioSourceCard(
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Аудио източник", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(
-                text = "На много устройства VOICE_CALL е блокиран. Приложението пробва избрания източник и fallback-и, без сигнал към отсрещната страна.",
+                text = "BOTH_SIDES / VOICE_CALL дават най-добър шанс за двете страни. Ако системата блокира, приложението ползва микрофон + високоговорител.",
                 style = MaterialTheme.typography.bodySmall
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
                 AudioSourceOption.entries.forEach { option ->
                     FilterChip(
                         selected = selected == option,
                         onClick = { onSelect(option) },
-                        label = { Text(option.name.removePrefix("VOICE_").take(8)) }
+                        label = { Text(option.chipLabel()) }
                     )
                 }
             }
         }
     }
+}
+
+private fun AudioSourceOption.chipLabel(): String = when (this) {
+    AudioSourceOption.BOTH_SIDES -> "BOTH"
+    AudioSourceOption.VOICE_CALL -> "CALL"
+    AudioSourceOption.VOICE_COMMUNICATION -> "COM"
+    AudioSourceOption.MIC -> "MIC"
+    AudioSourceOption.VOICE_RECOGNITION -> "REC"
+    AudioSourceOption.CAMCORDER -> "CAM"
 }
 
 @Composable
@@ -343,6 +411,8 @@ private fun SettingRow(
 private fun RecordingRow(
     item: RecordingItem,
     onPlay: () -> Unit,
+    onSaveDownloads: () -> Unit,
+    onSaveAs: () -> Unit,
     onShare: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -365,24 +435,29 @@ private fun RecordingRow(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(item.displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Text(text = meta, style = MaterialTheme.typography.bodySmall)
-            }
-            IconButton(onClick = onPlay) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Пусни")
-            }
-            IconButton(onClick = onShare) {
-                Icon(Icons.Default.Share, contentDescription = "Сподели")
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Изтрий")
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(item.displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Text(text = meta, style = MaterialTheme.typography.bodySmall)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onPlay) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Пусни")
+                }
+                IconButton(onClick = onSaveDownloads) {
+                    Icon(Icons.Default.Save, contentDescription = "Копирай в Изтегляния")
+                }
+                IconButton(onClick = onSaveAs) {
+                    Icon(Icons.Default.Folder, contentDescription = "Запази като…")
+                }
+                IconButton(onClick = onShare) {
+                    Icon(Icons.Default.Share, contentDescription = "Сподели")
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Изтрий")
+                }
             }
         }
     }
