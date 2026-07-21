@@ -10,9 +10,7 @@ import java.io.File
 
 /**
  * Records call audio locally without injecting any beep/tone into the call path.
- *
- * For both parties: tries VOICE_CALL first; when [preferBothSides] is true the service
- * also routes audio to the loudspeaker so MIC can pick up the remote side.
+ * MIC is preferred for reliability; VOICE_CALL is tried but often blocked on modern OEMs.
  */
 class CallAudioRecorder(private val context: Context) {
     private val recordingsRepository = RecordingsRepository(context)
@@ -27,7 +25,7 @@ class CallAudioRecorder(private val context: Context) {
 
     fun start(
         phoneNumber: String?,
-        preferredSource: AudioSourceOption = AudioSourceOption.BOTH_SIDES,
+        preferredSource: AudioSourceOption = AudioSourceOption.MIC,
         preferBothSides: Boolean = true
     ): File {
         if (isRecording) {
@@ -39,19 +37,23 @@ class CallAudioRecorder(private val context: Context) {
         var lastError: Exception? = null
 
         for (source in sources) {
+            // Fresh empty target for each attempt
+            if (file.exists()) {
+                runCatching { file.delete() }
+            }
             try {
                 val recorder = createRecorder()
                 recorder.setAudioSource(source)
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                recorder.setAudioEncodingBitRate(128_000)
-                recorder.setAudioSamplingRate(44_100)
+                recorder.setAudioEncodingBitRate(96_000)
+                recorder.setAudioSamplingRate(16_000)
                 recorder.setOutputFile(file.absolutePath)
                 recorder.prepare()
                 recorder.start()
                 mediaRecorder = recorder
                 outputFile = file
-                Log.i(TAG, "Recording started with source=$source file=${file.name}")
+                Log.i(TAG, "Recording started source=$source path=${file.absolutePath}")
                 return file
             } catch (e: Exception) {
                 lastError = e
@@ -73,17 +75,28 @@ class CallAudioRecorder(private val context: Context) {
                 try {
                     stop()
                 } catch (e: RuntimeException) {
-                    Log.w(TAG, "stop() failed: ${e.message}")
-                    file?.delete()
+                    // Common if call ended abruptly — keep file if it has audio bytes.
+                    Log.w(TAG, "MediaRecorder.stop() threw: ${e.message}")
+                    if (file == null || !file.exists() || file.length() == 0L) {
+                        file?.delete()
+                    }
                 }
-                reset()
-                release()
+                try {
+                    reset()
+                } catch (_: Exception) {
+                }
+                try {
+                    release()
+                } catch (_: Exception) {
+                }
             }
         } finally {
             mediaRecorder = null
             outputFile = null
         }
-        return file?.takeIf { it.exists() && it.length() > 0L }
+        val kept = file?.takeIf { it.exists() && it.length() > 0L }
+        Log.i(TAG, "Recording stop kept=${kept?.absolutePath} size=${kept?.length()}")
+        return kept
     }
 
     private fun createRecorder(): MediaRecorder {
@@ -96,34 +109,25 @@ class CallAudioRecorder(private val context: Context) {
     }
 
     private fun buildSourceOrder(preferred: AudioSourceOption, preferBothSides: Boolean): List<Int> {
+        // MIC first — most reliable while speakerphone is on.
+        val reliable = listOf(
+            MediaRecorder.AudioSource.MIC,
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            MediaRecorder.AudioSource.CAMCORDER,
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+            MediaRecorder.AudioSource.DEFAULT,
+            MediaRecorder.AudioSource.VOICE_CALL
+        )
         val preferredInt = preferred.toMediaSource()
-        val bothSidesFirst = listOf(
-            MediaRecorder.AudioSource.VOICE_CALL,
-            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
-            MediaRecorder.AudioSource.MIC,
-            MediaRecorder.AudioSource.VOICE_RECOGNITION,
-            MediaRecorder.AudioSource.CAMCORDER,
-            MediaRecorder.AudioSource.DEFAULT
-        )
-        val standard = listOf(
-            preferredInt,
-            MediaRecorder.AudioSource.VOICE_CALL,
-            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
-            MediaRecorder.AudioSource.MIC,
-            MediaRecorder.AudioSource.VOICE_RECOGNITION,
-            MediaRecorder.AudioSource.CAMCORDER,
-            MediaRecorder.AudioSource.DEFAULT
-        )
-        val ordered = if (preferBothSides || preferred == AudioSourceOption.BOTH_SIDES || preferred == AudioSourceOption.VOICE_CALL) {
-            listOf(preferredInt) + bothSidesFirst
+        return if (preferBothSides) {
+            (listOf(preferredInt) + reliable).distinct()
         } else {
-            standard
+            (listOf(preferredInt) + reliable).distinct()
         }
-        return ordered.distinct()
     }
 
     private fun AudioSourceOption.toMediaSource(): Int = when (this) {
-        AudioSourceOption.BOTH_SIDES -> MediaRecorder.AudioSource.VOICE_CALL
+        AudioSourceOption.BOTH_SIDES -> MediaRecorder.AudioSource.MIC
         AudioSourceOption.VOICE_CALL -> MediaRecorder.AudioSource.VOICE_CALL
         AudioSourceOption.VOICE_COMMUNICATION -> MediaRecorder.AudioSource.VOICE_COMMUNICATION
         AudioSourceOption.MIC -> MediaRecorder.AudioSource.MIC

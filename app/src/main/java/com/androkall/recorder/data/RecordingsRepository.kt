@@ -8,8 +8,15 @@ import java.util.Date
 import java.util.Locale
 
 class RecordingsRepository(context: Context) {
-    private val rootDir: File = File(context.getExternalFilesDir(null), "recordings").also {
-        if (!it.exists()) it.mkdirs()
+    private val rootDir: File = File(
+        context.getExternalFilesDir(null) ?: context.filesDir,
+        "recordings"
+    ).also { dir ->
+        if (!dir.exists()) {
+            check(dir.mkdirs() || dir.isDirectory) {
+                "Cannot create recordings dir: ${dir.absolutePath}"
+            }
+        }
     }
 
     fun createOutputFile(phoneNumber: String?): File {
@@ -23,6 +30,7 @@ class RecordingsRepository(context: Context) {
     fun listRecordings(): List<RecordingItem> {
         return rootDir.listFiles()
             ?.filter { it.isFile && (it.extension.equals("m4a", true) || it.extension.equals("3gp", true)) }
+            ?.filter { it.length() > 0L }
             ?.sortedByDescending { it.lastModified() }
             ?.map { file ->
                 val parts = file.nameWithoutExtension.split("_")

@@ -210,7 +210,7 @@ fun CallRecorderAppScreen(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Вътрешни файлове + бутони за копие в Изтегляния или „Запази като…“",
+                    text = "След разговор файлът отива в Изтегляния/EvtinkoCallRecorder и в списъка по-долу.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
@@ -371,7 +371,7 @@ private fun ControlsCard(
             )
             SettingRow(
                 title = "Автокопие в Изтегляния",
-                subtitle = "След край на записа → Изтегляния/EvtinkoCallRecorder",
+                subtitle = "Винаги се копира и при край на разговор (препоръчано ВКЛ)",
                 checked = autoSaveDownloads,
                 onCheckedChange = onAutoSaveChange
             )

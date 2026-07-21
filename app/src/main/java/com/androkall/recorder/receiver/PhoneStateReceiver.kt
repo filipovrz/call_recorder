@@ -3,10 +3,12 @@ package com.androkall.recorder.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.androkall.recorder.CallRecorderApp
 import com.androkall.recorder.call.CallPhase
+import com.androkall.recorder.data.AppSettings
 import com.androkall.recorder.service.CallControlNotifier
 import com.androkall.recorder.service.CallOverlayService
 import com.androkall.recorder.service.CallRecordingService
@@ -27,7 +29,6 @@ class PhoneStateReceiver : BroadcastReceiver() {
             try {
                 when (action) {
                     Intent.ACTION_NEW_OUTGOING_CALL -> {
-                        // Only remember the number — do NOT start recording yet.
                         lastOutgoingNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER)
                     }
                     TelephonyManager.ACTION_PHONE_STATE_CHANGED,
@@ -35,16 +36,14 @@ class PhoneStateReceiver : BroadcastReceiver() {
                         val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
                         val incoming = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
                         when (state) {
-                            TelephonyManager.EXTRA_STATE_RINGING -> {
+                            TelephonyManager.EXTRA_STATE_RINGING ->
                                 handlePhase(appContext, CallPhase.RINGING, incoming)
-                            }
                             TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                                 val number = incoming ?: lastOutgoingNumber
                                 handlePhase(appContext, CallPhase.OFFHOOK, number)
                             }
-                            TelephonyManager.EXTRA_STATE_IDLE -> {
+                            TelephonyManager.EXTRA_STATE_IDLE ->
                                 handlePhase(appContext, CallPhase.IDLE, null)
-                            }
                         }
                     }
                 }
@@ -61,13 +60,9 @@ class PhoneStateReceiver : BroadcastReceiver() {
         phase: CallPhase,
         number: String?
     ) {
-        // Debounce identical rapid repeats (OEMs fire PHONE_STATE multiple times).
-        // IDLE is never skipped — recording must always stop when the call ends.
         if (phase == lastPhase && phase != CallPhase.IDLE) {
-            Log.d(TAG, "Ignore duplicate phase=$phase")
             return
         }
-        lastPhase = phase
 
         val app = context as? CallRecorderApp
             ?: (context.applicationContext as? CallRecorderApp)
@@ -78,15 +73,13 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
         val settings = withTimeoutOrNull(2_000) {
             app.settingsRepository.settings.first()
-        } ?: run {
-            Log.w(TAG, "Settings timeout — using safe defaults")
-            com.androkall.recorder.data.AppSettings()
-        }
+        } ?: AppSettings()
 
         val canOverlay = PermissionHelper.canDrawOverlays(context)
 
         when (phase) {
             CallPhase.RINGING -> {
+                lastPhase = phase
                 if (settings.showCallNotification) {
                     CallControlNotifier.showRinging(context, number)
                 }
@@ -95,6 +88,8 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 }
             }
             CallPhase.OFFHOOK -> {
+                lastPhase = phase
+                lastOffhookElapsed = SystemClock.elapsedRealtime()
                 val shouldAutoStart = settings.autoRecordOnAnswer || settings.armedForNextCall
                 if (settings.showCallNotification && !shouldAutoStart) {
                     CallControlNotifier.showInCall(context, number, recording = false)
@@ -103,17 +98,23 @@ class PhoneStateReceiver : BroadcastReceiver() {
                     runCatching { CallOverlayService.show(context, number) }
                 }
                 if (shouldAutoStart) {
+                    Log.i(TAG, "OFFHOOK — start recording")
                     CallRecordingService.start(context, number)
                 }
             }
             CallPhase.IDLE -> {
-                // Always stop on hang-up — never debounce away the end of a call.
-                Log.i(TAG, "Call IDLE — stopping recording")
+                val sinceOffhook = SystemClock.elapsedRealtime() - lastOffhookElapsed
+                // Many OEMs emit a fake IDLE right when the call connects — ignore it.
+                if (sinceOffhook in 0 until CallRecordingService.IDLE_GRACE_MS) {
+                    Log.w(TAG, "Ignore spurious IDLE ${sinceOffhook}ms after OFFHOOK")
+                    return
+                }
+                lastPhase = phase
+                Log.i(TAG, "Call IDLE — stop recording")
                 CallRecordingService.stop(context)
                 runCatching { CallOverlayService.hide(context) }
                 CallControlNotifier.cancel(context)
                 lastOutgoingNumber = null
-                lastPhase = CallPhase.IDLE
             }
         }
     }
@@ -127,5 +128,8 @@ class PhoneStateReceiver : BroadcastReceiver() {
 
         @Volatile
         private var lastPhase: CallPhase? = null
+
+        @Volatile
+        private var lastOffhookElapsed: Long = 0L
     }
 }

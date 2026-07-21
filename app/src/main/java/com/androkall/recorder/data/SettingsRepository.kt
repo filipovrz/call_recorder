@@ -16,9 +16,9 @@ class SettingsRepository(private val context: Context) {
             autoRecordOnAnswer = prefs[Keys.AUTO_RECORD] ?: true,
             showOverlayOnRinging = prefs[Keys.SHOW_OVERLAY] ?: false,
             armedForNextCall = prefs[Keys.ARMED] ?: false,
-            preferredAudioSource = prefs[Keys.AUDIO_SOURCE] ?: AudioSourceOption.BOTH_SIDES.name,
+            preferredAudioSource = prefs[Keys.AUDIO_SOURCE] ?: AudioSourceOption.MIC.name,
             captureBothSides = prefs[Keys.BOTH_SIDES] ?: true,
-            autoSaveToDownloads = prefs[Keys.AUTO_DOWNLOADS] ?: false,
+            autoSaveToDownloads = prefs[Keys.AUTO_DOWNLOADS] ?: true,
             showCallNotification = prefs[Keys.CALL_NOTIFY] ?: true
         )
     }
@@ -66,9 +66,9 @@ data class AppSettings(
     val autoRecordOnAnswer: Boolean = true,
     val showOverlayOnRinging: Boolean = false,
     val armedForNextCall: Boolean = false,
-    val preferredAudioSource: String = AudioSourceOption.BOTH_SIDES.name,
+    val preferredAudioSource: String = AudioSourceOption.MIC.name,
     val captureBothSides: Boolean = true,
-    val autoSaveToDownloads: Boolean = false,
+    val autoSaveToDownloads: Boolean = true,
     val showCallNotification: Boolean = true
 )
 
