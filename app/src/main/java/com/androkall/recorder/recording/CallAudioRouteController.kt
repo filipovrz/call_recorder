@@ -16,11 +16,10 @@ class CallAudioRouteController(context: Context) {
     private var previousMode: Int? = null
 
     fun enableSpeakerForBothSides() {
-        val apply = {
+        runOnMain {
             try {
                 previousMode = audioManager.mode
                 previousSpeakerphone = audioManager.isSpeakerphoneOn
-                // Prefer IN_CALL during an active telephony call.
                 try {
                     audioManager.mode = AudioManager.MODE_IN_CALL
                 } catch (_: Exception) {
@@ -28,7 +27,6 @@ class CallAudioRouteController(context: Context) {
                 }
                 @Suppress("DEPRECATION")
                 audioManager.isSpeakerphoneOn = true
-                // Some OEMs need a second nudge.
                 mainHandler.postDelayed({
                     @Suppress("DEPRECATION")
                     audioManager.isSpeakerphoneOn = true
@@ -38,8 +36,6 @@ class CallAudioRouteController(context: Context) {
                 Log.w(TAG, "Failed to enable speakerphone: ${e.message}")
             }
         }
-        if (Looper.myLooper() == Looper.getMainLooper()) apply() else mainHandler.post(apply)
-        // Block briefly so recording starts after route change.
         try {
             Thread.sleep(350)
         } catch (_: InterruptedException) {
@@ -47,7 +43,7 @@ class CallAudioRouteController(context: Context) {
     }
 
     fun restore() {
-        val apply = {
+        runOnMain {
             try {
                 previousSpeakerphone?.let { wanted ->
                     @Suppress("DEPRECATION")
@@ -62,7 +58,14 @@ class CallAudioRouteController(context: Context) {
                 previousMode = null
             }
         }
-        if (Looper.myLooper() == Looper.getMainLooper()) apply() else mainHandler.post(apply)
+    }
+
+    private fun runOnMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+        } else {
+            mainHandler.post(block)
+        }
     }
 
     companion object {
