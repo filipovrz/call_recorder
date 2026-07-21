@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.SystemClock
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
@@ -20,10 +21,9 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.androkall.recorder.CallRecorderApp
 import com.androkall.recorder.R
-import com.androkall.recorder.data.AudioSourceOption
 import com.androkall.recorder.data.RecordingExporter
-import com.androkall.recorder.recording.CallAudioRecorder
 import com.androkall.recorder.recording.CallAudioRouteController
+import com.androkall.recorder.recording.PcmWavRecorder
 import com.androkall.recorder.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,24 +31,29 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.io.File
 
+/**
+ * Foreground mic recorder using PCM→WAV (reliable).
+ * Ignores fake early IDLE; stops on real hang-up or explicit STOP.
+ */
 class CallRecordingService : Service() {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mainHandler = Handler(Looper.getMainLooper())
-    private lateinit var recorder: CallAudioRecorder
+    private lateinit var recorder: PcmWavRecorder
     private var audioRoute: CallAudioRouteController? = null
     private var startedForeground = false
     private var phoneNumber: String? = null
     private var telephonyManager: TelephonyManager? = null
     private var telephonyCallback: TelephonyCallback? = null
     private var legacyListener: PhoneStateListener? = null
-    private var recordingStartedAt = 0L
+    private var recordingStartedElapsed = 0L
+    private var serviceStartedElapsed = 0L
     private var finishing = false
+    private var captureReady = false
 
     override fun onCreate() {
         super.onCreate()
-        recorder = CallAudioRecorder(this)
+        recorder = PcmWavRecorder(this)
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
     }
 
@@ -57,6 +62,8 @@ class CallRecordingService : Service() {
             ACTION_START -> {
                 phoneNumber = intent.getStringExtra(EXTRA_NUMBER)
                 finishing = false
+                captureReady = false
+                serviceStartedElapsed = SystemClock.elapsedRealtime()
                 if (!ensureForeground(phoneNumber)) {
                     isRunning = false
                     stopSelf()
@@ -64,104 +71,109 @@ class CallRecordingService : Service() {
                 }
                 isRunning = true
                 stopRequested = false
-                listenForCallEnd()
-                // Start ASAP — do not wait; delayed start was racing with spurious IDLE.
                 scope.launch { beginRecording() }
             }
-            ACTION_STOP -> {
-                stopRequested = true
-                finishRecording(reason = "stop")
-            }
-            else -> {
-                if (!recorder.isRecording) stopSelf()
-            }
+            ACTION_STOP -> finishRecording(reason = "stop", force = true)
+            else -> if (!recorder.isRecording) stopSelf()
         }
         return START_STICKY
     }
 
-    private suspend fun beginRecording() {
-        if (stopRequested) return
+    private fun beginRecording() {
+        if (stopRequested || finishing) return
         if (recorder.isRecording) return
 
-        val app = application as CallRecorderApp
-        val settings = runCatching { app.settingsRepository.settings.first() }.getOrElse {
-            com.androkall.recorder.data.AppSettings()
-        }
-        val source = runCatching {
-            AudioSourceOption.valueOf(settings.preferredAudioSource)
-        }.getOrDefault(AudioSourceOption.MIC)
-
-        val bothSides = settings.captureBothSides ||
-            source == AudioSourceOption.BOTH_SIDES ||
-            source == AudioSourceOption.VOICE_CALL
-
         try {
-            if (bothSides) {
-                audioRoute = CallAudioRouteController(this).also { it.enableSpeakerForBothSides() }
-            }
-            val file = recorder.start(phoneNumber, source, preferBothSides = bothSides)
-            recordingStartedAt = System.currentTimeMillis()
-            updateRecordingNotification(phoneNumber, file.name)
-            CallControlNotifier.showInCall(this, phoneNumber, recording = true)
-            if (settings.armedForNextCall) {
-                runCatching { app.settingsRepository.setArmedForNextCall(false) }
+            audioRoute = CallAudioRouteController(this).also { it.enableSpeakerForBothSides() }
+            val file = recorder.start(phoneNumber)
+            recordingStartedElapsed = SystemClock.elapsedRealtime()
+            captureReady = true
+            mainHandler.post {
+                updateRecordingNotification(phoneNumber, file.name)
+                CallControlNotifier.showInCall(this@CallRecordingService, phoneNumber, recording = true)
+                listenForCallEnd()
             }
             Log.i(TAG, "Recording OK: ${file.absolutePath}")
+
+            scope.launch {
+                runCatching {
+                    val app = application as CallRecorderApp
+                    val settings = app.settingsRepository.settings.first()
+                    if (settings.armedForNextCall) {
+                        app.settingsRepository.setArmedForNextCall(false)
+                    }
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Recording failed to start", e)
-            notifySavedOrFailed("Записът не стартира: ${e.message ?: "грешка"}")
-            teardown(keepService = false)
+            mainHandler.post {
+                notifySavedOrFailed("Записът не стартира: ${e.message ?: "грешка с микрофона"}")
+            }
+            teardown()
         }
     }
 
-    private fun finishRecording(reason: String) {
-        if (finishing) {
-            Log.d(TAG, "finishRecording already in progress ($reason)")
-            return
+    private fun finishRecording(reason: String, force: Boolean) {
+        if (finishing) return
+
+        val aliveMs = SystemClock.elapsedRealtime() - serviceStartedElapsed
+        val recordedMs = if (recordingStartedElapsed > 0) {
+            SystemClock.elapsedRealtime() - recordingStartedElapsed
+        } else {
+            0L
         }
+
+        if (!force && reason.contains("idle", ignoreCase = true)) {
+            if (!captureReady || recordedMs < MIN_RECORD_BEFORE_IDLE_STOP_MS || aliveMs < IDLE_GRACE_MS) {
+                Log.w(
+                    TAG,
+                    "IGNORE early IDLE ($reason) ready=$captureReady recordedMs=$recordedMs aliveMs=$aliveMs"
+                )
+                return
+            }
+        }
+
         finishing = true
-        mainHandler.removeCallbacksAndMessages(null)
+        stopRequested = true
         unlistenCallEnd()
+
         val file = runCatching { recorder.stop() }.getOrNull()
         audioRoute?.restore()
         audioRoute = null
         isRunning = false
-        stopRequested = false
+        captureReady = false
 
-        if (file != null) {
-            // Always copy to public Downloads so the user can find it.
+        if (file != null && file.length() > 44L) {
             val publicUri = runCatching { RecordingExporter.copyToDownloads(this, file) }.getOrNull()
-            val msg = if (publicUri != null) {
-                "Запазен в Изтегляния/EvtinkoCallRecorder\n${file.name} (${file.length() / 1024} KB)"
-            } else {
-                "Запазен в приложението\n${file.name} (${file.length() / 1024} KB)"
+            val msg = buildString {
+                append("Записът е готов: ${file.name}\n")
+                append("${file.length() / 1024} KB")
+                if (publicUri != null) append("\nКопие: Изтегляния/EvtinkoCallRecorder")
+                else append("\nВиж списъка в приложението")
             }
             Log.i(TAG, "Saved ($reason): ${file.absolutePath} public=$publicUri")
             notifySavedOrFailed(msg)
         } else {
-            Log.w(TAG, "No file kept after stop ($reason)")
-            notifySavedOrFailed("Няма запазен аудио файл (празен или неуспешен запис)")
+            Log.w(TAG, "No usable file ($reason) size=${file?.length()}")
+            notifySavedOrFailed(
+                "Записът е празен. Разреши МИКРОФОН и остави високоговорителя включен по време на разговора."
+            )
         }
 
-        runCatching {
-            if (startedForeground) stopForeground(STOP_FOREGROUND_REMOVE)
-        }
+        runCatching { if (startedForeground) stopForeground(STOP_FOREGROUND_REMOVE) }
         CallControlNotifier.cancel(this)
         stopSelf()
     }
 
-    private fun teardown(keepService: Boolean) {
+    private fun teardown() {
         unlistenCallEnd()
         runCatching { if (recorder.isRecording) recorder.stop() }
         audioRoute?.restore()
         audioRoute = null
         isRunning = false
-        if (!keepService) {
-            runCatching {
-                if (startedForeground) stopForeground(STOP_FOREGROUND_REMOVE)
-            }
-            stopSelf()
-        }
+        captureReady = false
+        runCatching { if (startedForeground) stopForeground(STOP_FOREGROUND_REMOVE) }
+        stopSelf()
     }
 
     private fun listenForCallEnd() {
@@ -171,8 +183,9 @@ class CallRecordingService : Service() {
                 val cb = object : TelephonyCallback(), TelephonyCallback.CallStateListener {
                     override fun onCallStateChanged(state: Int) {
                         if (state == TelephonyManager.CALL_STATE_IDLE) {
-                            Log.i(TAG, "TelephonyCallback IDLE — stop recording")
-                            mainHandler.post { finishRecording(reason = "telephony-idle") }
+                            mainHandler.post {
+                                finishRecording(reason = "telephony-idle", force = false)
+                            }
                         }
                     }
                 }
@@ -184,8 +197,9 @@ class CallRecordingService : Service() {
                     @Deprecated("Deprecated in Java")
                     override fun onCallStateChanged(state: Int, phoneNumber: String?) {
                         if (state == TelephonyManager.CALL_STATE_IDLE) {
-                            Log.i(TAG, "PhoneStateListener IDLE — stop recording")
-                            mainHandler.post { finishRecording(reason = "listener-idle") }
+                            mainHandler.post {
+                                finishRecording(reason = "listener-idle", force = false)
+                            }
                         }
                     }
                 }
@@ -236,8 +250,8 @@ class CallRecordingService : Service() {
 
     private fun updateRecordingNotification(number: String?, fileName: String) {
         if (!startedForeground) return
-        val notification = buildRecordingNotification(number, fileName)
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
+        NotificationManagerCompat.from(this)
+            .notify(NOTIFICATION_ID, buildRecordingNotification(number, fileName))
     }
 
     private fun notifySavedOrFailed(message: String) {
@@ -275,7 +289,7 @@ class CallRecordingService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val text = when {
-            fileName != null -> "Запис: $fileName"
+            fileName != null -> "Записва: $fileName"
             !number.isNullOrBlank() -> number
             else -> getString(R.string.notification_recording_text)
         }
@@ -297,9 +311,7 @@ class CallRecordingService : Service() {
     override fun onDestroy() {
         unlistenCallEnd()
         mainHandler.removeCallbacksAndMessages(null)
-        if (recorder.isRecording) {
-            runCatching { recorder.stop() }
-        }
+        if (recorder.isRecording) runCatching { recorder.stop() }
         audioRoute?.restore()
         audioRoute = null
         isRunning = false
@@ -315,6 +327,9 @@ class CallRecordingService : Service() {
         const val ACTION_STOP = "com.androkall.recorder.action.STOP_RECORDING"
         const val EXTRA_NUMBER = "extra_number"
 
+        const val IDLE_GRACE_MS = 4000L
+        private const val MIN_RECORD_BEFORE_IDLE_STOP_MS = 3000L
+
         @Volatile
         var isRunning: Boolean = false
             private set
@@ -322,12 +337,9 @@ class CallRecordingService : Service() {
         @Volatile
         private var stopRequested: Boolean = false
 
-        /** Ignore hang-up broadcasts this many ms after OFFHOOK (OEM glitches). */
-        const val IDLE_GRACE_MS = 2500L
-
         fun start(context: Context, phoneNumber: String?) {
             if (isRunning) {
-                Log.i(TAG, "Already running — keep current recording")
+                Log.i(TAG, "Already running")
                 return
             }
             stopRequested = false
@@ -344,7 +356,6 @@ class CallRecordingService : Service() {
         }
 
         fun stop(context: Context) {
-            stopRequested = true
             val intent = Intent(context, CallRecordingService::class.java).apply {
                 action = ACTION_STOP
             }

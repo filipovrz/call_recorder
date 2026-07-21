@@ -29,7 +29,11 @@ class RecordingsRepository(context: Context) {
 
     fun listRecordings(): List<RecordingItem> {
         return rootDir.listFiles()
-            ?.filter { it.isFile && (it.extension.equals("m4a", true) || it.extension.equals("3gp", true)) }
+            ?.filter { it.isFile && (
+                it.extension.equals("m4a", true) ||
+                    it.extension.equals("3gp", true) ||
+                    it.extension.equals("wav", true)
+                ) }
             ?.filter { it.length() > 0L }
             ?.sortedByDescending { it.lastModified() }
             ?.map { file ->

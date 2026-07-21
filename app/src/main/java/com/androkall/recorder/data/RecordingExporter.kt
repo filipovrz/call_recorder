@@ -22,7 +22,7 @@ object RecordingExporter {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val values = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, displayName)
-                put(MediaStore.Downloads.MIME_TYPE, "audio/mp4")
+                put(MediaStore.Downloads.MIME_TYPE, mimeFor(source))
                 put(MediaStore.Downloads.IS_PENDING, 1)
                 put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/EvtinkoCallRecorder")
             }
@@ -54,12 +54,18 @@ object RecordingExporter {
             @Suppress("DEPRECATION")
             val values = ContentValues().apply {
                 put(MediaStore.MediaColumns.DATA, dest.absolutePath)
-                put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4")
+                put(MediaStore.MediaColumns.MIME_TYPE, mimeFor(source))
                 put(MediaStore.MediaColumns.DISPLAY_NAME, displayName)
             }
             context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values)
                 ?: Uri.fromFile(dest)
         }
+    }
+
+    private fun mimeFor(file: File): String = when (file.extension.lowercase()) {
+        "wav" -> "audio/wav"
+        "3gp" -> "audio/3gpp"
+        else -> "audio/mp4"
     }
 
     fun copyToUri(context: Context, source: File, dest: Uri): Boolean {

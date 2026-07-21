@@ -109,6 +109,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
                     Log.w(TAG, "Ignore spurious IDLE ${sinceOffhook}ms after OFFHOOK")
                     return
                 }
+                // If still recording, prefer the service telephony listener; still send stop after grace.
                 lastPhase = phase
                 Log.i(TAG, "Call IDLE — stop recording")
                 CallRecordingService.stop(context)
