@@ -1,0 +1,603 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Evtinko export-docs">
+<title>Istoriya na zadachite</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+body { font-family: "Times New Roman", Times, serif; font-size: 12pt; }
+.body { white-space: pre-wrap; font-family: "Courier New", Courier, monospace; font-size: 10pt; }
+h1 { font-family: Arial, sans-serif; font-size: 16pt; }
+</style>
+</head>
+<body>
+<h1>Istoriya na zadachite</h1>
+<p>Auctions Evtinko Ltd. / Evtinko Call Recorder / export 2026-07-21 04:21</p>
+<div class="body">================================================================================<br><br>
+<br><br>
+
+ИСТОРИЯ НА РАЗГОВОРИТЕ (чат с асистента в Cursor)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+Проект: andro_call_recorder / Evtinko Call Recorder<br><br>
+<br><br>
+
+Издател: Auctions Evtinko Ltd.<br><br>
+<br><br>
+
+Домейн: https://call-recorder.evtinko-bg.com<br><br>
+<br><br>
+
+GitHub: https://github.com/filipovrz/call_recorder<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Този файл е само за разговора между теб и асистента — не за код.<br><br>
+<br><br>
+
+Как се поддържа: кажи „допиши историята“ / „сейф“ / „обнови историята“ —<br><br>
+<br><br>
+
+тогава асистентът добавя нов блок по-долу с всичко ново от разговора.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+ВАЖНО: пароли и токени НЕ се записват в този файл.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+ЧАСТ 1 — Старт: прочети файла / направи приложението (2026-07-20)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Прочети файла в проекта, питай ако нещо не е ясно и направи описаното<br><br>
+<br><br>
+
+Android приложение.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Инструментите се прекъсваха / workspace изглеждаше празен;<br><br>
+<br><br>
+
+опит за четене на проекта.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Какво става, нещо те затрудни ли?<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Потвърди, че командите се прекъсваха; опита отново.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Добре, не чети там — ето описанието тук:<br><br>
+<br><br>
+
+Създай phone call recorder за Android. Лесно включване по време на<br><br>
+<br><br>
+
+позвъняване и/или преди приемане. Да не се предупреждава отсрещната страна.<br><br>
+<br><br>
+
+След всяко по-голямо действие: чекпойнт, сейф на чата, README, GitHub.<br><br>
+<br><br>
+
+Повече подробности после.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Започна Kotlin/Compose scaffold:<br><br>
+<br><br>
+
+- CallRecordingService, CallOverlayService, PhoneStateReceiver<br><br>
+<br><br>
+
+- настройки: arm / автозапис / overlay<br><br>
+<br><br>
+
+- записи в списък<br><br>
+<br><br>
+
+- README + CHECKPOINTS + локален git init + първи commit<br><br>
+<br><br>
+
+- правна бележка (без warning tone; законът е отговорност на потребителя)<br><br>
+<br><br>
+
+Технически риск: двустранен запис ограничен на модерни Android версии.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+ЧАСТ 2 — Бранд, хостинг, GitHub данни (2026-07-20)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: За GitHub използвай имейл filipovrz@gmail.com и парола [ОТКАЗАНО/НЕ<br><br>
+<br><br>
+
+ЗАПИСАНА]. Приложението се тегли от мой хостинг. Запазена марка:<br><br>
+<br><br>
+
+Auctions Evtinko Ltd.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: ОТКАЗА да ползва/записва паролата. Препоръка: смени паролата<br><br>
+<br><br>
+
+веднага (беше в plain text). GitHub иска PAT или SSH, не акаунтна парола.<br><br>
+<br><br>
+
+Направи:<br><br>
+<br><br>
+
+- display name Evtinko Call Recorder<br><br>
+<br><br>
+
+- applicationId com.auctionsevtinko.callrecorder<br><br>
+<br><br>
+
+- бранд Auctions Evtinko Ltd. в UI/README<br><br>
+<br><br>
+
+- commit за бранда<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+ЧАСТ 3 — SSH / качване на хоста (2026-07-20)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Не разбирам от програмиране — помогни през SSH за хоста.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Поиска данни без пароли в чата.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Domain call-recorder.evtinko-bg.com<br><br>
+<br><br>
+
+Path File Manager:<br><br>
+<br><br>
+
+https://sofia.coolice.cloud:2222/evo/filemanager/files?path=/domains/call-recorder.evtinko-bg.com/public_html<br><br>
+<br><br>
+
+Направи страничка за теглене и качи в public_html.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Създаде deploy/public_html (лендинг + assets + downloads placeholder).<br><br>
+<br><br>
+
+SSH към sofia.coolice.cloud порт 22 работи на ниво хост, но няма username;<br><br>
+<br><br>
+
+порт 2222 е панел, не shell.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Ти даваш команди, аз връщам отговори.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Даде SSH тест команда.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Не така — дай насоки кои файлове да кача / откъде. Или виж инфо от<br><br>
+<br><br>
+
+online_obituary_board / evtinko_auction.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Прегледа другите проекти — няма Coolice credentials там.<br><br>
+<br><br>
+
+Написа HOSTING.md с точна таблица File Manager:<br><br>
+<br><br>
+
+качва се САМО съдържанието на deploy/public_html (не Android source).<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Качих и сайтът се отваря (+ скрийншот). Бутонът „Изтегли APK“ е сив —<br><br>
+<br><br>
+
+APK още не е качен (очаквано).<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Потвърди успех; следва APK build.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+ЧАСТ 4 — Билд без Android Studio (2026-07-20)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Нямам Android Studio — дай нещо друго и безплатно.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Стартира безплатен път:<br><br>
+<br><br>
+
+- инсталиран Microsoft OpenJDK 17 (winget)<br><br>
+<br><br>
+
+- gradle wrapper (gradlew / jar)<br><br>
+<br><br>
+
+- Android command-line tools + SDK 34 в %LOCALAPPDATA%\Android\Sdk<br><br>
+<br><br>
+
+- scripts: bootstrap-gradle-wrapper, setup-android-sdk, build-debug-apk<br><br>
+<br><br>
+
+- BUILD.md + GitHub Actions workflow .github/workflows/build-apk.yml<br><br>
+<br><br>
+
+- първи assembleDebug беше стартиран (Gradle download); APK още не е готов<br><br>
+<br><br>
+
+  към момента на този сейф<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+ЧАСТ 5 — Пълен сейф преди почивка / друг компютър (2026-07-20 ~23:32)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Направи сейф навсякъде — чекпойнт, целия чат от началото (да се обновява),<br><br>
+<br><br>
+
+GitHub https://github.com/filipovrz/call_recorder, README и други.<br><br>
+<br><br>
+
+После продължаваме след кратка почивка на друг компютър.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент (тази част):<br><br>
+<br><br>
+
+- Обновява този файл „История на задачите.txt“<br><br>
+<br><br>
+
+- CHECKPOINTS.md / README / HOSTING / BUILD<br><br>
+<br><br>
+
+- git commit + push към даденото GitHub repo<br><br>
+<br><br>
+
+- бележка за продължение: довършване на debug APK build и качване в<br><br>
+<br><br>
+
+  public_html/downloads/evtinko-call-recorder.apk<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+ЧАСТ 6 — Rename + почивка (2026-07-20)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Ти: Промени andro_kall_recorder на andro_call_recorder и почивка.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Асистент: Преименува локалната папка и обнови пътищата в HOSTING/BUILD/README/<br><br>
+<br><br>
+
+История/CHECKPOINTS; commit + push към GitHub; workspace root към новия път.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+СЪСТОЯНИЕ ПРИ СЕЙФ (checkpoint 4)<br><br>
+<br><br>
+
+================================================================================<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+ГОТОВО:<br><br>
+<br><br>
+
+[x] Android scaffold (Kotlin/Compose)<br><br>
+<br><br>
+
+[x] Лендинг на https://call-recorder.evtinko-bg.com<br><br>
+<br><br>
+
+[x] HOSTING.md инструкции<br><br>
+<br><br>
+
+[x] JDK 17 + SDK tools частично подготвени на този PC<br><br>
+<br><br>
+
+[x] GitHub Actions workflow за APK<br><br>
+<br><br>
+
+[ ] APK файл качен на хоста<br><br>
+<br><br>
+
+[ ] Release подпис (по-късно)<br><br>
+<br><br>
+
+[ ] GitHub push (изпълнява се в този сейф)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+СЛЕДВАЩА РАБОТА (друг компютър / след почивка):<br><br>
+<br><br>
+
+1. Клонирай/дърпай https://github.com/filipovrz/call_recorder<br><br>
+<br><br>
+
+2. Довърши build: scripts\build-debug-apk.ps1 (или GitHub Actions)<br><br>
+<br><br>
+
+3. Качи evtinko-call-recorder.apk в public_html/downloads/<br><br>
+<br><br>
+
+4. Провери бутона на сайта<br><br>
+<br><br>
+
+5. Функционални доработки по приложението (детайли от теб)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+На друг Windows PC за локален билд пак трябват JDK 17 + Android SDK<br><br>
+<br><br>
+
+(или само Actions в облака — по-лесно).<br><br>
+<br><br>
+
+<br><br>
+
+================================================================================<br><br>
+
+ЧАСТ 7 — Довършване на проекта (2026-07-21)<br><br>
+
+================================================================================<br><br>
+
+<br><br>
+
+Ти: Прегледай проекта, виж какво има още да се прави и го довърши.<br><br>
+
+<br><br>
+
+Асистент:<br><br>
+
+- Откри счупени Compose импорти (Modifier) — GitHub Actions compile FAIL<br><br>
+
+- На този PC няма JDK/SDK → билд през Actions<br><br>
+
+- Оправи импортите; довърши RINGING/armed overlay; duration + share;<br><br>
+
+  draggable overlay; refresh при resume; махна unused navigation<br><br>
+
+- Checkpoint 6 / README обновени<br><br>
+
+- Commit + push + Actions build → APK в deploy/public_html/downloads/<br><br>
+
+- Качването на хоста остава през File Manager (както преди)<br><br>
+
+<br><br>
+<br><br>
+
+<br><br>
+
+================================================================================<br><br>
+
+ЧАСТ 8 — Двете страни + сейф + брояч + почивка преди тест (2026-07-21)<br><br>
+
+================================================================================<br><br>
+
+<br><br>
+
+Ти: Сайтът е за теглене (не Play Store); всичко безплатно.<br><br>
+
+Асистент: Потвърди sideload модел; APK от хоста.<br><br>
+
+<br><br>
+
+Ти: Добави следене колко пъти е изтеглено.<br><br>
+
+Асистент: PHP download.php + count.php; брояч на лендинга; работи.<br><br>
+
+<br><br>
+
+Ти: Обясни как работи приложението / overlay / къде се пази записът.<br><br>
+
+Асистент: Обясни arm, автозапис, overlay при RINGING, папка на приложението.<br><br>
+
+<br><br>
+
+Ти: Трябват и двете страни (микрофон+слушалка) + сейф на друго място.<br><br>
+
+Асистент: v0.1.1 — „И двете страни“ (VOICE_CALL + speaker/mic),<br><br>
+
+  копие в Изтегляния / Запази като / автокопие; Actions APK готов.<br><br>
+
+<br><br>
+
+Ти: Има ли още какво да се добави? Ако няма — сейф навсякъде и почивка;<br><br>
+
+  утре тест.<br><br>
+
+Асистент: Няма критични липси преди тест. Nice-to-have след обратна връзка<br><br>
+
+  (release подпис, OEM battery, контакти, плеър). Checkpoint 7 + история +<br><br>
+
+  README + push. Почивка.<br><br>
+
+<br><br>
+
+СЪСТОЯНИЕ (checkpoint 7):<br><br>
+
+[x] App v0.1.1 (both-sides + export)<br><br>
+
+[x] Лендинг + брояч<br><br>
+
+[x] GitHub sync<br><br>
+
+[x] Локален APK за качване<br><br>
+
+[ ] Реален тест на устройство (утре)<br><br>
+
+[ ] Подписан release (по-късно)<br><br>
+
+<br><br>
+<br><br>
+
+<br><br>
+
+================================================================================<br><br>
+
+ЧАСТ 9 — Crash fix, auto version from APK, Office docs (2026-07-21)<br><br>
+
+================================================================================<br><br>
+
+- v0.1.3/0.1.4: crash при обаждане оправен; автозапис; стоп при IDLE<br><br>
+
+- Версията на сайта се чете от APK (assets/app_version.txt) — без задължителен version.json<br><br>
+
+- docs/*.doc за Office 2003 (scripts\export-docs.ps1)<br><br>
+
+<br><br>
+<br><br>
+
+</div>
+</body>
+</html>

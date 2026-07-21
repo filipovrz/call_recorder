@@ -1,0 +1,176 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Evtinko export-docs">
+<title>CHECKPOINTS</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+body { font-family: "Times New Roman", Times, serif; font-size: 12pt; }
+.body { white-space: pre-wrap; font-family: "Courier New", Courier, monospace; font-size: 10pt; }
+h1 { font-family: Arial, sans-serif; font-size: 16pt; }
+</style>
+</head>
+<body>
+<h1>CHECKPOINTS</h1>
+<p>Auctions Evtinko Ltd. / Evtinko Call Recorder / export 2026-07-21 04:21</p>
+<div class="body"># Checkpoint log<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Пълна история на разговора: [История на задачите.txt](История%20на%20задачите.txt)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 7 — 2026-07-21 (сейф преди тест / почивка)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+**Готово за тест (v0.1.1)**<br><br>
+<br><br>
+
+- Запис с опит за двете страни: VOICE_CALL + високоговорител/микрофон<br><br>
+<br><br>
+
+- Overlay бутон при звънене (влачене), arm, автозапис<br><br>
+<br><br>
+
+- Списък записи: пускане, споделяне, копие в Изтегляния, „Запази като…“, изтриване<br><br>
+<br><br>
+
+- Лендинг + PHP брояч на изтегляния: https://call-recorder.evtinko-bg.com<br><br>
+<br><br>
+
+- GitHub: https://github.com/filipovrz/call_recorder<br><br>
+<br><br>
+
+- Локален APK: `deploy/public_html/downloads/evtinko-call-recorder.apk`<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+**Утре (тест)**<br><br>
+<br><br>
+
+1. Качи APK v0.1.1 на хоста (ако още не е)<br><br>
+<br><br>
+
+2. Инсталирай от сайта; overlay + „И двете страни“<br><br>
+<br><br>
+
+3. Провери входящо/изходящо; качество на двете страни; сейф в Изтегляния<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+**По-късно (след обратна връзка от теста — не блокира сега)**<br><br>
+<br><br>
+
+- Подписан release APK<br><br>
+<br><br>
+
+- Настройки против battery kill (OEM)<br><br>
+<br><br>
+
+- Име на контакт в списъка; вграден плеър<br><br>
+<br><br>
+
+- По желание: PIN/заключване на списъка<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 6 — 2026-07-21 (довършване)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+- Оправени Compose импорти; RINGING/armed overlay; duration + share<br><br>
+<br><br>
+
+- Draggable overlay; Actions debug APK<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 5 — 2026-07-20 (rename)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Преименувана локална папка: `andro_kall_recorder` → `andro_call_recorder`.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 4 — 2026-07-20 (пълен сейф преди почивка)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+История, README/HOSTING/BUILD, GitHub, скриптове, Actions workflow; лендинг live.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 3 — 2026-07-20<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Лендинг качен; сайтът се отваря.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 2 — 2026-07-20<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Бранд Auctions Evtinko Ltd.; `applicationId` `com.auctionsevtinko.callrecorder`.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Checkpoint 1 — 2026-07-20<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Android scaffold; запис без warning tone; overlay/arm/auto-record.<br><br>
+<br><br>
+
+</div>
+</body>
+</html>

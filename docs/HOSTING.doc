@@ -1,0 +1,304 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Evtinko export-docs">
+<title>HOSTING</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+body { font-family: "Times New Roman", Times, serif; font-size: 12pt; }
+.body { white-space: pre-wrap; font-family: "Courier New", Courier, monospace; font-size: 10pt; }
+h1 { font-family: Arial, sans-serif; font-size: 16pt; }
+</style>
+</head>
+<body>
+<h1>HOSTING</h1>
+<p>Auctions Evtinko Ltd. / Evtinko Call Recorder / export 2026-07-21 04:21</p>
+<div class="body"># Хостинг — call-recorder.evtinko-bg.com (Coolice)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Панел (File Manager):  <br><br>
+<br><br>
+
+https://sofia.coolice.cloud:2222/evo/filemanager/files?path=/domains/call-recorder.evtinko-bg.com/public_html<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Локална папка за качване:  <br><br>
+<br><br>
+
+`andro_call_recorder/deploy/public_html/`<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Важно<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+В `public_html` се качва **само уеб страницата** (+ APK).  <br><br>
+<br><br>
+
+**Не** качвай целия Android проект (`app`, `gradle`, `.git` и т.н.).<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Дистрибуцията е **безплатна** от този хост — без Google Play.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+---<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Какво да качиш<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+| От компютъра | В File Manager (`.../public_html`) |<br><br>
+<br><br>
+
+|---|---|<br><br>
+<br><br>
+
+| `index.html` | `index.html` |<br><br>
+<br><br>
+
+| `robots.txt` | `robots.txt` |<br><br>
+<br><br>
+
+| `download.php` | `download.php` (брои тегленията + сервира APK) |<br><br>
+<br><br>
+
+| `count.php` | `count.php` (показва брояча на страницата) |<br><br>
+<br><br>
+
+| папка `assets/` | `assets/` (`styles.css`, `main.js`) |<br><br>
+<br><br>
+
+| папка `data/` | `data/` (`.htaccess` + `downloads.json`) |<br><br>
+<br><br>
+
+| папка `downloads/` | `downloads/` (`.htaccess` + `evtinko-call-recorder.apk`) |<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Крайна структура:<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+```<br><br>
+<br><br>
+
+public_html/<br><br>
+<br><br>
+
+  index.html<br><br>
+<br><br>
+
+  robots.txt<br><br>
+<br><br>
+
+  download.php<br><br>
+<br><br>
+
+  count.php<br><br>
+<br><br>
+
+  assets/<br><br>
+<br><br>
+
+    styles.css<br><br>
+<br><br>
+
+    main.js<br><br>
+<br><br>
+
+  data/<br><br>
+<br><br>
+
+    .htaccess<br><br>
+<br><br>
+
+    downloads.json      ← брояч (започва от 0)<br><br>
+<br><br>
+
+  downloads/<br><br>
+<br><br>
+
+    .htaccess           ← блокира директен линк към APK<br><br>
+<br><br>
+
+    evtinko-call-recorder.apk<br><br>
+<br><br>
+
+```<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+След качване: правата на `data/` и `data/downloads.json` трябва да позволяват запис от PHP<br><br>
+<br><br>
+
+(обикновено 755 за папка / 644 за файл; ако броенето не работи — пробвай 775 / 666).<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+---<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Брояч на изтегляния<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+- Бутонът води към `download.php` → +1 към брояча → тегли APK.<br><br>
+<br><br>
+
+- На страницата се вижда: „Изтеглено N пъти“ (от `count.php`).<br><br>
+<br><br>
+
+- Директният URL към `.apk` е блокиран, за да не се заобикаля броенето.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Проверка: https://call-recorder.evtinko-bg.com/count.php  <br><br>
+<br><br>
+
+трябва да върне JSON като `{&quot;count&quot;:0,&quot;available&quot;:true,&quot;version&quot;:&quot;0.1.0&quot;}`.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+---<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## APK<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Локално копие след Actions билд:<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+`deploy/public_html/downloads/evtinko-call-recorder.apk`<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Качи го в `public_html/downloads/` със същото име.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+---<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## SSH (по желание)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+- Хост: `sofia.coolice.cloud`<br><br>
+<br><br>
+
+- Порт: **22** (не 2222)<br><br>
+<br><br>
+
+- Път: `domains/call-recorder.evtinko-bg.com/public_html`<br><br>
+<br><br>
+
+<br><br>
+
+## Версия на сайта<br><br>
+
+<br><br>
+
+Файлът `version.json` се генерира от `scripts\sync-deploy-version.ps1` (или от GitHub Actions).<br><br>
+
+При всяко ново APK качвай **и** `version.json` в корена на `public_html`.<br><br>
+
+Страницата чете версията от `count.php` → няма ръчно пипане на `0.1.x` в HTML.<br><br>
+
+<br><br>
+<br><br>
+
+<br><br>
+
+## Версия на сайта (автоматично от APK)<br><br>
+
+<br><br>
+
+От v0.1.4 нататък count.php чете версията от файла вътре в APK: assets/app_version.txt.<br><br>
+
+<br><br>
+
+Практично: качваш САМО downloads/evtinko-call-recorder.apk и сайтът показва версията сам.<br><br>
+
+version.json е само резервен вариант (не е задължителен).<br><br>
+
+Нужен е PHP с ZipArchive (стандартно на Coolice).<br><br>
+
+<br><br>
+
+Обнови на хоста поне веднъж: count.php (+ по желание assets/main.js).<br><br>
+
+<br><br>
+<br><br>
+
+</div>
+</body>
+</html>

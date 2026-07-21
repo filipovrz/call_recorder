@@ -199,3 +199,11 @@ GitHub https://github.com/filipovrz/call_recorder, README и други.
 [ ] Реален тест на устройство (утре)
 [ ] Подписан release (по-късно)
 
+
+================================================================================
+ЧАСТ 9 — Crash fix, auto version from APK, Office docs (2026-07-21)
+================================================================================
+- v0.1.3/0.1.4: crash при обаждане оправен; автозапис; стоп при IDLE
+- Версията на сайта се чете от APK (assets/app_version.txt) — без задължителен version.json
+- docs/*.doc за Office 2003 (scripts\export-docs.ps1)
+

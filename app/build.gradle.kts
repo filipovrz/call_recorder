@@ -11,8 +11,8 @@ android {
         applicationId = "com.auctionsevtinko.callrecorder"
         minSdk = 26
         targetSdk = 34
-        versionCode = 4
-        versionName = "0.1.3"
+        versionCode = 5
+        versionName = "0.1.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -49,6 +49,18 @@ android {
         }
     }
 }
+
+// Keep assets/app_version.txt in sync so the website can read version from the APK alone.
+tasks.register("writeAppVersionAsset") {
+    val outFile = file("src/main/assets/app_version.txt")
+    outputs.file(outFile)
+    doLast {
+        outFile.parentFile.mkdirs()
+        val name = android.defaultConfig.versionName ?: "0.0.0"
+        outFile.writeText("$name\nminAndroid=8.0\n")
+    }
+}
+tasks.named("preBuild").configure { dependsOn("writeAppVersionAsset") }
 
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.06.00")

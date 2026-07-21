@@ -62,6 +62,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
         number: String?
     ) {
         // Debounce identical rapid repeats (OEMs fire PHONE_STATE multiple times).
+        // IDLE is never skipped — recording must always stop when the call ends.
         if (phase == lastPhase && phase != CallPhase.IDLE) {
             Log.d(TAG, "Ignore duplicate phase=$phase")
             return
@@ -106,6 +107,8 @@ class PhoneStateReceiver : BroadcastReceiver() {
                 }
             }
             CallPhase.IDLE -> {
+                // Always stop on hang-up — never debounce away the end of a call.
+                Log.i(TAG, "Call IDLE — stopping recording")
                 CallRecordingService.stop(context)
                 runCatching { CallOverlayService.hide(context) }
                 CallControlNotifier.cancel(context)

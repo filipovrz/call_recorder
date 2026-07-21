@@ -1,0 +1,131 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Evtinko export-docs">
+<title>BUILD</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+body { font-family: "Times New Roman", Times, serif; font-size: 12pt; }
+.body { white-space: pre-wrap; font-family: "Courier New", Courier, monospace; font-size: 10pt; }
+h1 { font-family: Arial, sans-serif; font-size: 16pt; }
+</style>
+</head>
+<body>
+<h1>BUILD</h1>
+<p>Auctions Evtinko Ltd. / Evtinko Call Recorder / export 2026-07-21 04:21</p>
+<div class="body"># Безплатен билд на APK (без Android Studio)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Два начина — и двата са безплатни.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Начин A (препоръчан за теб): GitHub Actions в облака<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+1. Създай безплатен акаунт/repo в GitHub.<br><br>
+<br><br>
+
+2. Качи този проект (или дай Personal Access Token — **не парола** — и аз пушвам).<br><br>
+<br><br>
+
+3. В GitHub: **Actions** → **Build APK** → **Run workflow**.<br><br>
+<br><br>
+
+4. Изчакай зелена отметка → отвори run → **Artifacts** → изтегли `evtinko-call-recorder-debug`.<br><br>
+<br><br>
+
+5. Преименувай APK на `evtinko-call-recorder.apk`.<br><br>
+<br><br>
+
+6. Качи го в хоста: `public_html/downloads/evtinko-call-recorder.apk`.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Готово — бутонът на сайта става активен.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+## Начин B: на този компютър (JDK 17 + Android command-line tools)<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Нужно е веднъж:<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+1. **OpenJDK 17** (безплатно) — чрез winget:<br><br>
+<br><br>
+
+   ```powershell<br><br>
+<br><br>
+
+   winget install --id Microsoft.OpenJDK.17 -e<br><br>
+<br><br>
+
+   ```<br><br>
+<br><br>
+
+2. **Android command-line tools** (безплатно от Google) — скриптът `scripts\setup-android-sdk.ps1` ги сваля.<br><br>
+<br><br>
+
+3. После билд:<br><br>
+<br><br>
+
+   ```powershell<br><br>
+<br><br>
+
+   cd &quot;D:\Filpov Ne Pipai\Projects\andro_call_recorder&quot;<br><br>
+<br><br>
+
+   .\scripts\build-debug-apk.ps1<br><br>
+<br><br>
+
+   ```<br><br>
+<br><br>
+
+4. Готовият файл е около:<br><br>
+<br><br>
+
+   `app\build\outputs\apk\debug\app-debug.apk`<br><br>
+<br><br>
+
+5. Копирай/преименувай до `evtinko-call-recorder.apk` и качи в `downloads/` на хоста.<br><br>
+<br><br>
+
+<br><br>
+<br><br>
+
+Debug APK е достатъчен за тест и sideload от твоя сайт. По-късно правим подписан release.<br><br>
+<br><br>
+
+</div>
+</body>
+</html>

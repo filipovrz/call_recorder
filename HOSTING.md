@@ -84,3 +84,14 @@ public_html/
 При всяко ново APK качвай **и** `version.json` в корена на `public_html`.
 Страницата чете версията от `count.php` → няма ръчно пипане на `0.1.x` в HTML.
 
+
+## Версия на сайта (автоматично от APK)
+
+От v0.1.4 нататък count.php чете версията от файла вътре в APK: assets/app_version.txt.
+
+Практично: качваш САМО downloads/evtinko-call-recorder.apk и сайтът показва версията сам.
+version.json е само резервен вариант (не е задължителен).
+Нужен е PHP с ZipArchive (стандартно на Coolice).
+
+Обнови на хоста поне веднъж: count.php (+ по желание assets/main.js).
+
