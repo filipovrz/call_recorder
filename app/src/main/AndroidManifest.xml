@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
@@ -37,6 +38,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.CallPromptActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.AndroCallRecorder" />
+
         <service
             android:name=".service.CallRecordingService"
             android:exported="false"
@@ -46,12 +56,32 @@
             android:name=".service.CallOverlayService"
             android:exported="false" />
 
+        <service
+            android:name=".tile.ArmRecordingTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_mic"
+            android:label="@string/tile_arm_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <receiver
             android:name=".receiver.PhoneStateReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.CallActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.androkall.recorder.action.CALL_NOTIFY_START" />
+                <action android:name="com.androkall.recorder.action.CALL_NOTIFY_STOP" />
             </intent-filter>
         </receiver>
 

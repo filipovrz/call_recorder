@@ -32,7 +32,11 @@ class CallRecorderApp : Application() {
                 CHANNEL_CALL,
                 getString(R.string.notification_channel_call),
                 NotificationManager.IMPORTANCE_HIGH
-            )
+            ).apply {
+                description = "Бутон Запис при обаждане (без overlay)"
+                setShowBadge(false)
+                enableVibration(true)
+            }
         )
     }
 

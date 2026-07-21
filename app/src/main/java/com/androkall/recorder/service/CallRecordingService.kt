@@ -73,6 +73,7 @@ class CallRecordingService : Service() {
                 audioRoute = CallAudioRouteController(this).also { it.enableSpeakerForBothSides() }
             }
             recorder.start(number, source, preferBothSides = bothSides)
+            CallControlNotifier.showInCall(this, number, recording = true)
             if (settings.armedForNextCall) {
                 app.settingsRepository.setArmedForNextCall(false)
             }

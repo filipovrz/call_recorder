@@ -72,6 +72,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         settingsRepository.setAutoSaveToDownloads(enabled)
     }
 
+    fun setShowCallNotification(enabled: Boolean) = viewModelScope.launch {
+        settingsRepository.setShowCallNotification(enabled)
+    }
+
     fun startManualRecording() {
         CallRecordingService.start(getApplication(), null)
     }

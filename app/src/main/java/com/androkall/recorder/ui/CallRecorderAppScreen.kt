@@ -154,19 +154,31 @@ fun CallRecorderAppScreen(
             }
 
             item {
+                if (!PermissionHelper.canDrawOverlays(context)) {
+                    RestrictedSettingsCard(
+                        onOpenAppInfo = { PermissionHelper.openAppDetails(context) },
+                        onOpenNotifications = { PermissionHelper.openNotificationSettings(context) }
+                    )
+                }
+            }
+
+            item {
                 ControlsCard(
                     armed = settings.armedForNextCall,
                     autoRecord = settings.autoRecordOnAnswer,
+                    showCallNotification = settings.showCallNotification,
                     showOverlay = settings.showOverlayOnRinging,
                     bothSides = settings.captureBothSides,
                     autoSaveDownloads = settings.autoSaveToDownloads,
                     hasOverlayPermission = PermissionHelper.canDrawOverlays(context),
                     onArmChange = viewModel::setArmed,
                     onAutoRecordChange = viewModel::setAutoRecord,
+                    onCallNotificationChange = viewModel::setShowCallNotification,
                     onShowOverlayChange = viewModel::setShowOverlay,
                     onBothSidesChange = viewModel::setCaptureBothSides,
                     onAutoSaveChange = viewModel::setAutoSaveToDownloads,
                     onRequestOverlay = { PermissionHelper.openOverlaySettings(context) },
+                    onOpenAppInfo = { PermissionHelper.openAppDetails(context) },
                     onStartNow = {
                         if (!PermissionHelper.hasAllRuntimePermissions(context)) {
                             permissionLauncher.launch(PermissionHelper.requiredPermissions())
@@ -271,19 +283,52 @@ fun CallRecorderAppScreen(
 }
 
 @Composable
+private fun RestrictedSettingsCard(
+    onOpenAppInfo: () -> Unit,
+    onOpenNotifications: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                text = stringResource(R.string.restricted_help_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = stringResource(R.string.restricted_help_body),
+                style = MaterialTheme.typography.bodySmall
+            )
+            OutlinedButton(onClick = onOpenAppInfo, modifier = Modifier.fillMaxWidth()) {
+                Text("Отвори инфо за приложението (за ограничени настройки)")
+            }
+            OutlinedButton(onClick = onOpenNotifications, modifier = Modifier.fillMaxWidth()) {
+                Text("Разреши известия (нужни за бутон при обаждане)")
+            }
+        }
+    }
+}
+
+@Composable
 private fun ControlsCard(
     armed: Boolean,
     autoRecord: Boolean,
+    showCallNotification: Boolean,
     showOverlay: Boolean,
     bothSides: Boolean,
     autoSaveDownloads: Boolean,
     hasOverlayPermission: Boolean,
     onArmChange: (Boolean) -> Unit,
     onAutoRecordChange: (Boolean) -> Unit,
+    onCallNotificationChange: (Boolean) -> Unit,
     onShowOverlayChange: (Boolean) -> Unit,
     onBothSidesChange: (Boolean) -> Unit,
     onAutoSaveChange: (Boolean) -> Unit,
     onRequestOverlay: () -> Unit,
+    onOpenAppInfo: () -> Unit,
     onStartNow: () -> Unit,
     onStopNow: () -> Unit
 ) {
@@ -295,40 +340,62 @@ private fun ControlsCard(
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Бързи действия", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
+            Text(
+                text = "Препоръчано без overlay: автозапис + известие „Запис“ при обаждане.",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            SettingRow(
+                title = "Автозапис при отговор",
+                subtitle = "Започва сам при вдигане — работи без бутон върху екрана",
+                checked = autoRecord,
+                onCheckedChange = onAutoRecordChange
+            )
+            SettingRow(
+                title = "Известие с бутон „Запис“ при обаждане",
+                subtitle = "Появява се при звънене/разговор — докосни Запис от известието",
+                checked = showCallNotification,
+                onCheckedChange = onCallNotificationChange
+            )
+            SettingRow(
+                title = "Подготви запис за следващото обаждане",
+                subtitle = "Или ползвай плочката „Evtinko запис“ в бързите настройки",
+                checked = armed,
+                onCheckedChange = onArmChange
+            )
             SettingRow(
                 title = "И двете страни на разговора",
-                subtitle = "Високоговорител + микрофон (и опит за VOICE_CALL). Разговорът минава през високоговорителя по време на запис.",
+                subtitle = "Високоговорител + микрофон (и опит за VOICE_CALL)",
                 checked = bothSides,
                 onCheckedChange = onBothSidesChange
             )
             SettingRow(
                 title = "Автокопие в Изтегляния",
-                subtitle = "След край на записа копира файла в Изтегляния/EvtinkoCallRecorder",
+                subtitle = "След край на записа → Изтегляния/EvtinkoCallRecorder",
                 checked = autoSaveDownloads,
                 onCheckedChange = onAutoSaveChange
             )
             SettingRow(
-                title = "Подготви запис за следващото обаждане",
-                subtitle = "Включи преди позвъняване — стартира при вдигане",
-                checked = armed,
-                onCheckedChange = onArmChange
-            )
-            SettingRow(
-                title = "Автозапис при отговор",
-                subtitle = "Започва веднага щом разговорът влезе в OFFHOOK",
-                checked = autoRecord,
-                onCheckedChange = onAutoRecordChange
-            )
-            SettingRow(
-                title = "Бутон върху екрана при звънене",
-                subtitle = "Лесно включване преди/по време на обаждане (може да се влачи)",
+                title = "Бутон върху екрана (overlay)",
+                subtitle = if (hasOverlayPermission) {
+                    "Разрешено — плаващ бутон при звънене"
+                } else {
+                    "Често заключено за APK извън Play Store — не е задължително"
+                },
                 checked = showOverlay,
                 onCheckedChange = onShowOverlayChange
             )
 
-            if (!hasOverlayPermission) {
+            if (!hasOverlayPermission && showOverlay) {
+                OutlinedButton(onClick = onOpenAppInfo, modifier = Modifier.fillMaxWidth()) {
+                    Text("Разреши ограничени настройки (⋮ в инфо за приложението)")
+                }
                 OutlinedButton(onClick = onRequestOverlay, modifier = Modifier.fillMaxWidth()) {
-                    Text("Разреши overlay (бутон върху другите приложения)")
+                    Text("После: разрешение за overlay")
+                }
+            } else if (!hasOverlayPermission) {
+                OutlinedButton(onClick = onRequestOverlay, modifier = Modifier.fillMaxWidth()) {
+                    Text("Опитай overlay (по желание)")
                 }
             }
 

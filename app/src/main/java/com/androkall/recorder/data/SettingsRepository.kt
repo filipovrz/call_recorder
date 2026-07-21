@@ -13,12 +13,13 @@ private val Context.dataStore by preferencesDataStore(name = "settings")
 class SettingsRepository(private val context: Context) {
     val settings: Flow<AppSettings> = context.dataStore.data.map { prefs ->
         AppSettings(
-            autoRecordOnAnswer = prefs[Keys.AUTO_RECORD] ?: false,
-            showOverlayOnRinging = prefs[Keys.SHOW_OVERLAY] ?: true,
+            autoRecordOnAnswer = prefs[Keys.AUTO_RECORD] ?: true,
+            showOverlayOnRinging = prefs[Keys.SHOW_OVERLAY] ?: false,
             armedForNextCall = prefs[Keys.ARMED] ?: false,
             preferredAudioSource = prefs[Keys.AUDIO_SOURCE] ?: AudioSourceOption.BOTH_SIDES.name,
             captureBothSides = prefs[Keys.BOTH_SIDES] ?: true,
-            autoSaveToDownloads = prefs[Keys.AUTO_DOWNLOADS] ?: false
+            autoSaveToDownloads = prefs[Keys.AUTO_DOWNLOADS] ?: false,
+            showCallNotification = prefs[Keys.CALL_NOTIFY] ?: true
         )
     }
 
@@ -46,6 +47,10 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.AUTO_DOWNLOADS] = enabled }
     }
 
+    suspend fun setShowCallNotification(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.CALL_NOTIFY] = enabled }
+    }
+
     private object Keys {
         val AUTO_RECORD = booleanPreferencesKey("auto_record_on_answer")
         val SHOW_OVERLAY = booleanPreferencesKey("show_overlay_on_ringing")
@@ -53,20 +58,21 @@ class SettingsRepository(private val context: Context) {
         val AUDIO_SOURCE = stringPreferencesKey("preferred_audio_source")
         val BOTH_SIDES = booleanPreferencesKey("capture_both_sides")
         val AUTO_DOWNLOADS = booleanPreferencesKey("auto_save_to_downloads")
+        val CALL_NOTIFY = booleanPreferencesKey("show_call_notification")
     }
 }
 
 data class AppSettings(
-    val autoRecordOnAnswer: Boolean = false,
-    val showOverlayOnRinging: Boolean = true,
+    val autoRecordOnAnswer: Boolean = true,
+    val showOverlayOnRinging: Boolean = false,
     val armedForNextCall: Boolean = false,
     val preferredAudioSource: String = AudioSourceOption.BOTH_SIDES.name,
     val captureBothSides: Boolean = true,
-    val autoSaveToDownloads: Boolean = false
+    val autoSaveToDownloads: Boolean = false,
+    val showCallNotification: Boolean = true
 )
 
 enum class AudioSourceOption {
-    /** Prefer call mix, then mic (best chance for both parties). */
     BOTH_SIDES,
     VOICE_CALL,
     VOICE_COMMUNICATION,

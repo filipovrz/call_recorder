@@ -5,9 +5,22 @@
     <string name="notification_channel_recording">Запис на разговор</string>
     <string name="notification_recording_title">Записът е активен</string>
     <string name="notification_recording_text">Разговорът се записва. Докосни за управление.</string>
-    <string name="notification_channel_call">Обаждане</string>
+    <string name="notification_channel_call">Обаждане — бутон за запис</string>
     <string name="overlay_start_record">Запис</string>
     <string name="overlay_stop_record">Стоп</string>
+    <string name="call_notify_ringing_title">Входящо обаждане — запис?</string>
+    <string name="call_notify_incall_title">Разговор — запис</string>
+    <string name="call_notify_recording_title">Записът е активен</string>
+    <string name="call_notify_text">Докосни „Запис“ в известието или отвори екрана</string>
+    <string name="call_notify_open">Отвори</string>
+    <string name="call_prompt_ringing">Обаждане… Започни запис преди/при отговор</string>
+    <string name="call_prompt_incall">Разговорът е активен</string>
+    <string name="call_prompt_dismiss">Затвори</string>
+    <string name="tile_arm_label">Evtinko запис</string>
+    <string name="tile_arm_on">Подготвен за следващото</string>
+    <string name="tile_arm_off">Докосни за подготовка</string>
     <string name="legal_notice">Записвай разговори само когато това е позволено от закона в твоята държава. Приложението не предупреждава отсрещната страна със звуков сигнал. За двете страни ползвай високоговорител + микрофон (или VOICE_CALL, ако устройството го позволява).</string>
     <string name="about_footer">© Auctions Evtinko Ltd. · Безплатно · APK от официалния хост (не от Google Play)</string>
+    <string name="restricted_help_title">Ако „над други приложения“ е заключено</string>
+    <string name="restricted_help_body">Android блокира overlay за APK извън Play Store. Не е нужно — ползвай известието „Запис“ при обаждане, автозапис или плочката в бързите настройки. За overlay по желание: Инфо за приложението → ⋮ → Разреши ограничени настройки → после включи „Показване над други приложения“.</string>
 </resources>

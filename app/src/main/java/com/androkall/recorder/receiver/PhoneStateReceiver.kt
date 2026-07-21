@@ -6,8 +6,10 @@ import android.content.Intent
 import android.telephony.TelephonyManager
 import com.androkall.recorder.CallRecorderApp
 import com.androkall.recorder.call.CallPhase
+import com.androkall.recorder.service.CallControlNotifier
 import com.androkall.recorder.service.CallOverlayService
 import com.androkall.recorder.service.CallRecordingService
+import com.androkall.recorder.util.PermissionHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -57,20 +59,27 @@ class PhoneStateReceiver : BroadcastReceiver() {
     ) {
         val app = context.applicationContext as CallRecorderApp
         val settings = app.settingsRepository.settings.first()
+        val canOverlay = PermissionHelper.canDrawOverlays(context)
 
         when (phase) {
             CallPhase.RINGING -> {
-                // Show overlay while ringing so the user can start before answering.
-                // Also show when armed, even if the overlay toggle is off.
-                if (settings.showOverlayOnRinging || settings.armedForNextCall) {
+                // Primary path (works for sideloaded APKs): notification + prompt activity.
+                if (settings.showCallNotification) {
+                    CallControlNotifier.showRinging(context, number)
+                }
+                // Overlay only if Android allows it (often blocked for sideload).
+                if (canOverlay && (settings.showOverlayOnRinging || settings.armedForNextCall)) {
                     CallOverlayService.show(context, number)
                 }
             }
             CallPhase.OFFHOOK -> {
-                if (settings.showOverlayOnRinging || settings.armedForNextCall) {
+                val shouldAutoStart = settings.autoRecordOnAnswer || settings.armedForNextCall
+                if (settings.showCallNotification) {
+                    CallControlNotifier.showInCall(context, number, recording = shouldAutoStart)
+                }
+                if (canOverlay && (settings.showOverlayOnRinging || settings.armedForNextCall)) {
                     CallOverlayService.show(context, number)
                 }
-                val shouldAutoStart = settings.autoRecordOnAnswer || settings.armedForNextCall
                 if (shouldAutoStart) {
                     CallRecordingService.start(context, number)
                 }
@@ -78,6 +87,7 @@ class PhoneStateReceiver : BroadcastReceiver() {
             CallPhase.IDLE -> {
                 CallRecordingService.stop(context)
                 CallOverlayService.hide(context)
+                CallControlNotifier.cancel(context)
                 lastOutgoingNumber = null
             }
         }
