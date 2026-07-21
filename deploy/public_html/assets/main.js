@@ -21,6 +21,12 @@
     countWrap.hidden = false;
   }
 
+  function statusReady(version, minAndroid) {
+    var v = version || "?";
+    var min = minAndroid || "8.0";
+    return "Безплатно · Версия " + v + " · Android " + min + "+ · Готово за изтегляне";
+  }
+
   function disableButton() {
     if (!btn) return;
     btn.classList.add("is-disabled");
@@ -42,8 +48,7 @@
 
       if (data && data.available) {
         if (status) {
-          status.textContent =
-            "Безплатно · Версия 0.1.1 · Android 8.0+ · Готово за изтегляне";
+          status.textContent = statusReady(data.version, data.minAndroid);
         }
       } else {
         disableButton();
@@ -54,18 +59,28 @@
       }
     })
     .catch(function () {
-      // Fallback if PHP is unavailable: try direct APK HEAD.
+      // Fallback: version.json + direct APK check
       if (!btn) return;
       var apkUrl = "downloads/evtinko-call-recorder.apk";
       btn.setAttribute("href", apkUrl);
       btn.setAttribute("download", "");
 
-      fetch(apkUrl, { method: "HEAD", cache: "no-store" })
-        .then(function (res) {
-          if (!res.ok) throw new Error("missing");
+      Promise.all([
+        fetch("version.json", { cache: "no-store" })
+          .then(function (r) {
+            return r.ok ? r.json() : {};
+          })
+          .catch(function () {
+            return {};
+          }),
+        fetch(apkUrl, { method: "HEAD", cache: "no-store" }),
+      ])
+        .then(function (parts) {
+          var meta = parts[0] || {};
+          var head = parts[1];
+          if (!head.ok) throw new Error("missing");
           if (status) {
-            status.textContent =
-              "Безплатно · Версия 0.1.1 · Android 8.0+ · Готово за изтегляне";
+            status.textContent = statusReady(meta.version, meta.minAndroid);
           }
         })
         .catch(function () {
@@ -79,7 +94,6 @@
 
   if (btn) {
     btn.addEventListener("click", function () {
-      // Optimistic bump after a counted download starts.
       if (!countNum || btn.classList.contains("is-disabled")) return;
       window.setTimeout(function () {
         fetch("count.php", { cache: "no-store" })

@@ -33,9 +33,25 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
+      - name: Sync site version.json from Gradle
+        run: |
+          VERSION=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n1)
+          echo "App versionName=$VERSION"
+          printf '{\n  "version": "%s",\n  "minAndroid": "8.0",\n  "updated_at": "%s"\n}\n' \
+            "$VERSION" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            > deploy/public_html/version.json
+          cat deploy/public_html/version.json
+
+      - name: Stage APK for hosting folder
+        run: |
+          mkdir -p deploy/public_html/downloads
+          cp app/build/outputs/apk/debug/*.apk deploy/public_html/downloads/evtinko-call-recorder.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: evtinko-call-recorder-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            deploy/public_html/downloads/evtinko-call-recorder.apk
+            deploy/public_html/version.json
           if-no-files-found: error

@@ -77,3 +77,10 @@ public_html/
 - Хост: `sofia.coolice.cloud`
 - Порт: **22** (не 2222)
 - Път: `domains/call-recorder.evtinko-bg.com/public_html`
+
+## Версия на сайта
+
+Файлът `version.json` се генерира от `scripts\sync-deploy-version.ps1` (или от GitHub Actions).
+При всяко ново APK качвай **и** `version.json` в корена на `public_html`.
+Страницата чете версията от `count.php` → няма ръчно пипане на `0.1.x` в HTML.
+

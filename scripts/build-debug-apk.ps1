@@ -50,7 +50,10 @@ New-Item -ItemType Directory -Force -Path $destDir | Out-Null
 $dest = Join-Path $destDir "evtinko-call-recorder.apk"
 Copy-Item $apk.FullName $dest -Force
 
+& (Join-Path $PSScriptRoot "sync-deploy-version.ps1")
+
 Write-Host ""
 Write-Host "OK: $($apk.FullName)"
 Write-Host "Copied for hosting upload: $dest"
+Write-Host "Also upload deploy/public_html/version.json (site version label)."
 Write-Host "Upload that file to public_html/downloads/evtinko-call-recorder.apk"
