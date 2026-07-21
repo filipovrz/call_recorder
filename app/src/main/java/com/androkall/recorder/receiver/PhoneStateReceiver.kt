@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.telephony.TelephonyManager
+import android.util.Log
 import com.androkall.recorder.CallRecorderApp
 import com.androkall.recorder.call.CallPhase
 import com.androkall.recorder.service.CallControlNotifier
@@ -12,20 +13,22 @@ import com.androkall.recorder.service.CallRecordingService
 import com.androkall.recorder.util.PermissionHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class PhoneStateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         val pending = goAsync()
-        CoroutineScope(Dispatchers.Default).launch {
+        val appContext = context.applicationContext
+        scope.launch {
             try {
                 when (action) {
                     Intent.ACTION_NEW_OUTGOING_CALL -> {
-                        val number = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER)
-                        lastOutgoingNumber = number
-                        handlePhase(context, CallPhase.OFFHOOK, number, isIncoming = false)
+                        // Only remember the number — do NOT start recording yet.
+                        lastOutgoingNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER)
                     }
                     TelephonyManager.ACTION_PHONE_STATE_CHANGED,
                     "android.intent.action.PHONE_STATE" -> {
@@ -33,20 +36,22 @@ class PhoneStateReceiver : BroadcastReceiver() {
                         val incoming = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
                         when (state) {
                             TelephonyManager.EXTRA_STATE_RINGING -> {
-                                handlePhase(context, CallPhase.RINGING, incoming, isIncoming = true)
+                                handlePhase(appContext, CallPhase.RINGING, incoming)
                             }
                             TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                                 val number = incoming ?: lastOutgoingNumber
-                                handlePhase(context, CallPhase.OFFHOOK, number, isIncoming = incoming != null)
+                                handlePhase(appContext, CallPhase.OFFHOOK, number)
                             }
                             TelephonyManager.EXTRA_STATE_IDLE -> {
-                                handlePhase(context, CallPhase.IDLE, null, isIncoming = true)
+                                handlePhase(appContext, CallPhase.IDLE, null)
                             }
                         }
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "PhoneStateReceiver failed", e)
             } finally {
-                pending.finish()
+                runCatching { pending.finish() }
             }
         }
     }
@@ -54,31 +59,47 @@ class PhoneStateReceiver : BroadcastReceiver() {
     private suspend fun handlePhase(
         context: Context,
         phase: CallPhase,
-        number: String?,
-        isIncoming: Boolean
+        number: String?
     ) {
-        val app = context.applicationContext as CallRecorderApp
-        val settings = app.settingsRepository.settings.first()
+        // Debounce identical rapid repeats (OEMs fire PHONE_STATE multiple times).
+        if (phase == lastPhase && phase != CallPhase.IDLE) {
+            Log.d(TAG, "Ignore duplicate phase=$phase")
+            return
+        }
+        lastPhase = phase
+
+        val app = context as? CallRecorderApp
+            ?: (context.applicationContext as? CallRecorderApp)
+        if (app == null) {
+            Log.e(TAG, "Application is not CallRecorderApp")
+            return
+        }
+
+        val settings = withTimeoutOrNull(2_000) {
+            app.settingsRepository.settings.first()
+        } ?: run {
+            Log.w(TAG, "Settings timeout — using safe defaults")
+            com.androkall.recorder.data.AppSettings()
+        }
+
         val canOverlay = PermissionHelper.canDrawOverlays(context)
 
         when (phase) {
             CallPhase.RINGING -> {
-                // Primary path (works for sideloaded APKs): notification + prompt activity.
                 if (settings.showCallNotification) {
                     CallControlNotifier.showRinging(context, number)
                 }
-                // Overlay only if Android allows it (often blocked for sideload).
                 if (canOverlay && (settings.showOverlayOnRinging || settings.armedForNextCall)) {
-                    CallOverlayService.show(context, number)
+                    runCatching { CallOverlayService.show(context, number) }
                 }
             }
             CallPhase.OFFHOOK -> {
                 val shouldAutoStart = settings.autoRecordOnAnswer || settings.armedForNextCall
-                if (settings.showCallNotification) {
-                    CallControlNotifier.showInCall(context, number, recording = shouldAutoStart)
+                if (settings.showCallNotification && !shouldAutoStart) {
+                    CallControlNotifier.showInCall(context, number, recording = false)
                 }
                 if (canOverlay && (settings.showOverlayOnRinging || settings.armedForNextCall)) {
-                    CallOverlayService.show(context, number)
+                    runCatching { CallOverlayService.show(context, number) }
                 }
                 if (shouldAutoStart) {
                     CallRecordingService.start(context, number)
@@ -86,21 +107,22 @@ class PhoneStateReceiver : BroadcastReceiver() {
             }
             CallPhase.IDLE -> {
                 CallRecordingService.stop(context)
-                CallOverlayService.hide(context)
+                runCatching { CallOverlayService.hide(context) }
                 CallControlNotifier.cancel(context)
                 lastOutgoingNumber = null
+                lastPhase = CallPhase.IDLE
             }
         }
-
-        lastCallWasIncoming = isIncoming
     }
 
     companion object {
+        private const val TAG = "PhoneStateReceiver"
+        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
         @Volatile
         private var lastOutgoingNumber: String? = null
 
         @Volatile
-        var lastCallWasIncoming: Boolean = true
-            private set
+        private var lastPhase: CallPhase? = null
     }
 }
