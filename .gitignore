@@ -15,3 +15,7 @@ app/build
 .chat-checkpoints/
 deploy/public_html/downloads/*.apk
 !deploy/public_html/downloads/README.txt
+
+# Local APK download scratch
+_apk_out/
+

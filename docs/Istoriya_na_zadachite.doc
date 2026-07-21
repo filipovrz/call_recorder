@@ -23,7 +23,7 @@ h1 { font-family: Arial, sans-serif; font-size: 16pt; }
 </head>
 <body>
 <h1>Istoriya na zadachite</h1>
-<p>Auctions Evtinko Ltd. / Evtinko Call Recorder / export 2026-07-21 04:21</p>
+<p>Auctions Evtinko Ltd. / Evtinko Call Recorder / export 2026-07-21 05:19</p>
 <div class="body">================================================================================<br><br>
 <br><br>
 
@@ -594,6 +594,49 @@ GitHub https://github.com/filipovrz/call_recorder, README и други.<br><br>
 - Версията на сайта се чете от APK (assets/app_version.txt) — без задължителен version.json<br><br>
 
 - docs/*.doc за Office 2003 (scripts\export-docs.ps1)<br><br>
+
+<br><br>
+<br><br>
+
+<br><br>
+
+================================================================================<br><br>
+
+ЧАСТ 10 — Сейф преди сън (2026-07-21 ~05:18)<br><br>
+
+================================================================================<br><br>
+
+<br><br>
+
+Ти: Не работи, уморих се, лягам. Сейф на всичко; утре продължаваме.<br><br>
+
+<br><br>
+
+Асистент:<br><br>
+
+- Признава: записът на телефона още не е оправен задоволително.<br><br>
+
+- Последен код/APK: v0.1.6 (PCM WAV, grace за фалшив IDLE) — билднат, в<br><br>
+
+  deploy/public_html/downloads/evtinko-call-recorder.apk<br><br>
+
+- Checkpoint 8 + README + docs/*.doc обновени<br><br>
+
+- GitHub push на сейфа<br><br>
+
+- Утре приоритет: реален работещ запис на Xiaomi/HyperOS<br><br>
+
+<br><br>
+
+СЪСТОЯНИЕ:<br><br>
+
+[x] Сайт + брояч + версия от APK<br><br>
+
+[x] GitHub sync<br><br>
+
+[x] docs/*.doc<br><br>
+
+[ ] Работил запис на устройство (НЕ)<br><br>
 
 <br><br>
 <br><br>
