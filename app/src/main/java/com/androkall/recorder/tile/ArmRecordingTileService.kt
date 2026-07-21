@@ -1,5 +1,6 @@
 package com.androkall.recorder.tile
 
+import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.androkall.recorder.CallRecorderApp
@@ -45,10 +46,12 @@ class ArmRecordingTileService : TileService() {
             qsTile?.apply {
                 state = if (armed) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
                 label = getString(R.string.tile_arm_label)
-                subtitle = if (armed) {
-                    getString(R.string.tile_arm_on)
-                } else {
-                    getString(R.string.tile_arm_off)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    subtitle = if (armed) {
+                        getString(R.string.tile_arm_on)
+                    } else {
+                        getString(R.string.tile_arm_off)
+                    }
                 }
                 updateTile()
             }
